@@ -1,0 +1,446 @@
+
+/**
+ * @file ServerSelector.module.css
+ * @description CSS Modules optimizado para ServerSelectorScreen
+ */
+
+/* Container principal */
+.container {
+  flex: 1;
+  /* Migrar gradiente a clase util (.bg-app-gradient) posteriormente; gradiente unificado base */
+  background: linear-gradient(135deg, #1a1a24 0%, #2d2d2d 100%);
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Header section */
+.header {
+  margin-bottom: 20px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* Search Container */
+.searchContainer {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.searchInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.searchInputWrapper:focus-within {
+  border-color: #00C851;
+  box-shadow: 0 0 0 2px rgba(0, 200, 81, 0.2);
+}
+
+.searchIcon {
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Eliminado: .searchSpinner (no usado) */
+
+.searchInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 12px 8px;
+  color: white;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.searchClearButton {
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.searchClearButton:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.searchResults {
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
+.searchResultsText {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Server List Container */
+.serverListContainer {
+  flex: 1;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.serverList {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.serverList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.serverList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.serverList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.serverList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Server Items */
+.serverItem {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.serverItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.serverItem:last-child {
+  border-bottom: none;
+}
+
+.serverItemActive {
+  background: rgba(0, 200, 81, 0.1);
+  border-left: 3px solid #00C851;
+}
+
+.serverFlag {
+  width: 24px;
+  height: 18px;
+  border-radius: 2px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  /* Fondo claro semitransparente neutral para bandera */
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.serverInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.serverName {
+  font-size: 16px;
+  font-weight: 500;
+  color: white;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.serverLocation {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.serverStats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.serverPing {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.serverLoad {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.loadIndicator {
+  width: 32px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loadBar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.loadLow {
+  background: #00C851;
+}
+
+.loadMedium {
+  background: #FFB000;
+}
+
+.loadHigh {
+  background: #FF3547;
+}
+
+/* Server Groups */
+.serverGroup {
+  margin-bottom: 24px;
+}
+
+.serverGroupHeader {
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.serverGroupTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.serverGroupCount {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Active Server Card */
+.activeServerCard {
+  background: linear-gradient(135deg, #00C851 0%, #00A043 100%);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.activeServerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.activeServerTitle {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  opacity: 0.9;
+}
+
+.activeServerName {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+
+.activeServerLocation {
+  font-size: 14px;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Loading states */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+/* Eliminado: .loadingSpinner (no usado) */
+
+.loadingText {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* Error states */
+.errorIcon {
+  width: 48px;
+  height: 48px;
+  color: #FF3547;
+  margin-bottom: 16px;
+}
+
+.errorTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 8px 0;
+}
+
+.errorMessage {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 20px 0;
+  max-width: 300px;
+}
+
+.errorButton {
+  background: #FF3547;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.errorButton:hover {
+  background: #E5002F;
+}
+
+/* Empty state */
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: 16px;
+}
+
+.emptyTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 8px 0;
+}
+
+.emptyMessage {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  max-width: 300px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+  
+  .serverItem {
+    padding: 12px 16px;
+  }
+  
+  .serverStats {
+    gap: 8px;
+  }
+  
+  .activeServerCard {
+    padding: 16px;
+  }
+}
+
+/* Performance optimizations */
+.container * {
+  box-sizing: border-box;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .serverItem,
+  .loadingSpinner,
+  .searchInputWrapper {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* 
+ * NOTA: Para estados de error y empty, usar la clase .loading 
+ * que ya contiene los estilos necesarios
+ */
+
+/* 
+ * NOTA: 
+ * - Usar .subtitle para loadingText
+ * - Usar .serverPing para serverLoad 
+ * (Clases duplicadas eliminadas)
+ */

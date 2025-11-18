@@ -1,0 +1,55 @@
+{
+  "name": "vpn-app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "sideEffects": [
+    "src/index.css",
+    "src/styles/**",
+    "**/*.css"
+  ],
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc && vite build",
+    "build:inline": "npx tsx build-inline.ts",
+    "detect:hex": "node scripts/detect-raw-hex.js",
+    "preview": "vite preview --host --port 80",
+    "analyze": "node scripts/optimize-analysis.js",
+    "analyze:unused": "node scripts/analyze-unused-code.js",
+    "analyze:bundle": "npm run build && npx vite-bundle-analyzer dist/assets/*.js",
+    "build:analyze": "npm run build && npm run analyze",
+    "clean:unused": "node scripts/clean-unused-code.js",
+    "clean:dry-run": "node scripts/clean-unused-code.js --dry-run",
+    "cleanup:deps": "node scripts/cleanup-dependencies.js",
+    "cleanup:files": "node scripts/cleanup-unused-files.js",
+    "cleanup:files:safe": "node scripts/cleanup-unused-files.js --remove-safe",
+    "cleanup:all": "npm run cleanup:files:safe && npm run cleanup:deps",
+    "audit:code": "npx unimported && npx depcheck",
+    "optimize:advanced": "node scripts/advanced-cleanup.js",
+    "report:final": "node scripts/final-report.js",
+    "analyze:heavy": "node scripts/analyze-heavy-components.js",
+    "analyze:complete": "npm run analyze:heavy && npm run report:final",
+    "plan:optimize": "node scripts/optimization-plan.js",
+    "optimize:phase1": "node scripts/optimize-phase1.js"
+  },
+  "dependencies": {
+    "lucide-react": "0.525.0",
+    "prop-types": "^15.8.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-simple-maps": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.0.10",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "@types/react-simple-maps": "^3.0.6",
+    "@vitejs/plugin-react": "4.6.0",
+    "rollup-plugin-visualizer": "^6.0.3",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.5.3",
+    "unimported": "^1.31.0",
+    "vite": "7.0.2",
+    "vite-bundle-analyzer": "^1.2.3"
+  }
+}

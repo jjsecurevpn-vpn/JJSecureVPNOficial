@@ -1,0 +1,800 @@
+/**
+ * @file en.ts
+ * @description English translations for JJSecure VPN
+ */
+
+import { Translations } from "./types";
+
+export const en: Translations = {
+  tvMode: {
+    title: "TV Mode",
+    noServerSelected: "No server selected",
+    howItWorksButton: "How It Works?",
+    howItWorksTooltip: "Learn how the app works",
+    steps: {
+      credentials: "ENTER CREDENTIALS",
+      selectServer: "CHOOSE SERVER",
+      connection: "CONNECTION",
+      stepLabel: "STEP",
+    },
+    emptyCategory: "Select a category to view servers",
+    validation: {
+      incomplete: "Incomplete setup",
+      noServer: "No configuration selected",
+      missingCredentials: "Missing credentials",
+      processError: "Error processing connection",
+    },
+    connection: { statusPrefix: "Current status:" },
+    howItWorksModal: {
+      title: "How It Works?",
+      introTitle: "It is very easy to use JJSecure on your TV!",
+      introSubtitle: "Follow these simple steps:",
+      steps: {
+        install: {
+          title: "Install the app on your TV",
+          desc: "Download and install JJSecure on your Smart TV from the app store.",
+        },
+        wifi: {
+          title: "Share WiFi from your phone",
+          desc: "Use your phone (Personal carrier, no balance needed) to share internet via WiFi.",
+        },
+        follow: {
+          title: "Follow the steps shown here",
+          desc: "Complete the 3 steps: credentials, choose server and connect. All with your remote control!",
+        },
+        enjoy: {
+          title: "Enjoy browsing!",
+          desc: "Once connected you can browse freely on your Smart TV with full privacy.",
+        },
+      },
+      tipLabel: "Tip",
+      tipText:
+        "You do not need balance on your Personal carrier phone. The connection works with the special configuration.",
+      confirmButton: "Got it, start!",
+    },
+  },
+  modals: {
+    missingConfig: {
+      title: "Incomplete setup",
+      advice:
+        "Tip: you can open credentials from the header icon and the selector from the top card.",
+      messages: {
+        missingCredentials:
+          "Your access credentials are missing (username and/or password).",
+        missingServer: "You have not selected a server.",
+        missingSetup:
+          "Missing data to connect: select a server and complete your credentials.",
+      },
+      buttons: {
+        configureCredentials: "Configure credentials",
+        chooseServer: "Choose server",
+        server: "Server",
+        credentials: "Credentials",
+      },
+    },
+    cleanData: {
+      title: "Clean Data",
+      attention: "Attention!",
+      permanent: "This action will permanently remove all application data.",
+      willRemove: "The following data will be removed:",
+      items: {
+        connectionConfigs: "Connection configurations",
+        userCredentials: "User data and credentials",
+        preferences: "Application preferences",
+        history: "Connection history",
+      },
+      requirementTitle: "Important requirement",
+      requirementText:
+        "A stable internet connection is required to download configurations again after cleaning.",
+      buttons: {
+        confirm: "Confirm - Clean Data",
+        cancel: "Cancel",
+      },
+    },
+  },
+  header: {
+    protected: "I am protected",
+    notProtected: "Not protected",
+    connecting: "Connecting...",
+    noConnection: "No connection",
+    connected: "Connected",
+    disconnected: "Disconnected",
+  },
+  tutorial: {
+    start: "Start tutorial",
+  },
+  languages: {
+    spanish: "Spanish",
+    english: "English",
+    portuguese: "Portuguese",
+  },
+  common: {
+    close: "Close",
+    select: "Select",
+    cancel: "Cancel",
+    back: "Back",
+    continue: "Continue",
+    accept: "Accept",
+    decline: "Decline",
+    confirm: "Confirm",
+    loading: "Loading",
+    error: "Error",
+    success: "Success",
+    warning: "Warning",
+    info: "Information",
+  },
+  support: {
+    title: "Support Center",
+    subtitle: "We are here to help you at all times",
+    directContact: "Direct Contact",
+    whatsapp: "WhatsApp",
+    telegram: "Telegram",
+    recommended: "Recommended",
+    immediateResponse: "Immediate response",
+    specializedSupport: "Specialized support",
+    fastChat: "Fast chat",
+    efficientChat: "Efficient chat",
+    communities: "Communities",
+    joinCommunities: "Join our communities",
+    whatsappGroup: "WhatsApp Group",
+    telegramChannel: "Telegram Channel",
+    telegramGroup: "Telegram Group",
+    userCommunity: "User community",
+    newsUpdates: "News and updates",
+    discussionsHelp: "Discussions and help",
+  },
+  welcome: {
+    title: "Welcome to JJSecure VPN",
+    subtitle: "Your privacy and security are our priority",
+    description: "Protect your connection and browse securely",
+    buy: "Buy Premium",
+    resell: "Reseller Plans",
+    termsAcceptance: "By continuing, you accept our",
+    termsAndConditions: "Terms and Conditions",
+    certifiedVpn: "Certified VPN",
+    simpleMode: "Simple Mode",
+    simpleModeDesc: "Clean and easy to use interface",
+    advancedMode: "Advanced Mode",
+    advancedModeDesc: "Full control and detailed configuration",
+    chooseMode: "Choose how you want to use the app",
+    mobileMode: "Mobile Mode",
+    mobileModeDesc: "Vertical interface optimized for phone",
+    tvMode: "SmartTV Mode",
+    tvModeDesc: "Horizontal interface for TV with big buttons",
+    startMobile: "Start in Mobile Mode",
+    openTvMode: "Open SmartTV Mode",
+    termsText: "By continuing, you accept our",
+    termsLink: "Terms and Conditions",
+    privacyLink: "Privacy Policy",
+  },
+  settings: {
+    title: "Settings",
+    general: "General",
+    support: "Support",
+    account: "Account",
+    about: "About",
+    quickActions: "Quick Actions",
+    tools: "Tools",
+    configurations: "Configurations",
+    update: "Update Application",
+    updateDesc: "Check and install the latest available update",
+    autoConnect: "Auto Connect",
+    autoConnectDesc: "Auto connect on startup",
+    hotspot: "Hotspot",
+    apn: "Configure APN",
+    apnDesc: "Network access point settings",
+    battery: "Battery Optimization",
+    batteryDesc: "Configure battery optimization",
+    credentials: "Access Credentials",
+    credentialsDesc: "Configure username and password",
+    cleanData: "Clean Data",
+    cleanDataDesc: "Remove settings and cache",
+    viewPremiumPlans: "View Premium Plans",
+    resellerProgram: "Reseller Program",
+    affiliateProgram: "Affiliate Program",
+    supportCommunitiesLabel: "Support & Communities",
+    supportCommunitiesDesc: "24/7 Support - Communities",
+    downloadApp: "Download App",
+    downloadAppDesc: "Download the official app from Google Play",
+    termsAndConditions: "Terms and Conditions",
+    privacyPolicy: "Privacy Policy",
+    premiumInfo: {
+      title: "Premium Information",
+      subtitle: "Get premium access with high-speed servers and lower latency.",
+      description:
+        "Enjoy exclusive locations and priority support when you need it most.",
+      features: [
+        "Higher speed during peak hours and greater stability.",
+        "More locations and servers available.",
+        "Priority support from our team.",
+      ],
+      upgradeButton: "Upgrade to Premium",
+    },
+  },
+  hotspot: {
+    title: "Share VPN Connection",
+    sharing: "Sharing VPN Connection",
+    notSharing: "Hotspot Disabled",
+    sharingDescription: "Other devices can connect and use your VPN",
+    notSharingDescription:
+      "Activate hotspot to share your secure VPN connection",
+    start: "Start Hotspot",
+    stop: "Stop Hotspot",
+    processing: "Processing...",
+    activeConnectionTitle: "✅ VPN Connection Sharing Active",
+    activeConnectionDescription:
+      "Devices connected to your hotspot are protected by VPN",
+    howToConfigure: "📋 Step-by-Step Guide",
+    whatYouWillAchieve: "🎯 What will you achieve?",
+    whatYouWillAchieveDesc:
+      "Turn your device into a WiFi access point that shares your secure VPN connection with other devices (phones, tablets, laptops, etc.)",
+    proxyGuide: {
+      title: "📌 How to share internet via VPN with Proxy",
+      steps: [
+        "1️⃣ Open the VPN app on your phone and enable the internal Hotspot option (inside the app).",
+        "2️⃣ When enabled, the notification bar will show the Proxy and Port info → write them down because you will need them.",
+        "3️⃣ Now enable Android's regular Hotspot (portable Wi‑Fi zone) and set a password.",
+        "4️⃣ On the receiving phone (the one that will get internet):\n• Connect to the Wi‑Fi network you just created.\n• In the advanced network settings, enter the Proxy and Port you noted earlier.",
+        "5️⃣ Save the changes and connect.",
+      ],
+      finalMessage:
+        "✅ Done! You can now enjoy shared internet through the VPN with Proxy.",
+    },
+    importantTips: {
+      title: "💡 Important Tips",
+      battery:
+        "Battery: Hotspot consumes more battery, keep your device charged",
+      speed: "Speed: Speed will be shared among all connected devices",
+      security:
+        "Security: All connected devices will be protected by your VPN automatically",
+    },
+    footerTip:
+      "💡 Tip: Make sure you are connected to VPN before starting the hotspot",
+    tip: "Tip:",
+    tipDescription: 'To browse without VPN, change proxy to "Automatic"',
+  },
+  autoConnect: {
+    title: "Auto Connection",
+    settingsTitle: "Settings",
+    searchTitle: "Search",
+    subtitle: "Find the best configuration automatically",
+    description: "Test all configurations until finding one that works",
+    startTest: "Start Test",
+    stopTest: "Stop Test",
+    clearResults: "Clear Results",
+    settings: "Settings",
+    backToMain: "Back to Main",
+    mainScreen: {
+      subtitle: "Automatically find the best available configuration",
+      description:
+        "JJSecure will automatically test all available configurations to find the one that works best in your location.",
+      lastSuccessful: "Last successful connection:",
+      noSuccessful: "No previous successful connections",
+      startButton: "Start Automatic Search",
+      settingsButton: "Configure Filters",
+    },
+    status: {
+      idle: "Ready to start",
+      running: "Testing configurations...",
+      success: "Configuration found",
+      failed: "No configuration worked",
+      cancelled: "Test cancelled",
+      testing: "Testing",
+      error: "Error",
+      timeout: "Timeout",
+    },
+    progress: {
+      testing: "Testing",
+      of: "of",
+      configurations: "configurations",
+      current: "Current:",
+      success: "Success:",
+      failed: "Failed:",
+      status: "Search Status",
+      completed: "Search completed",
+      cancelled: "Search cancelled",
+      error: "Search error",
+      currentTest: "Testing:",
+      tested: "Tested",
+      successful: "Successful:",
+      detailedLogs: "Detailed Logs",
+      showLogs: "Show Logs",
+      hideLogs: "Hide Logs",
+      startButton: "Start",
+      stopButton: "Stop",
+      backButton: "Back",
+      showDetails: "Show Details",
+      noTests: "No tests executed",
+      testResults: "Test Results",
+    },
+    settingsScreen: {
+      title: "Auto Connection Settings",
+      filters: "Search Filters",
+      categories: "Categories to Include",
+      selectCategories: "Select categories",
+      allCategories: "All categories",
+      advanced: "Advanced Settings",
+      timeout: "Timeout per configuration",
+      timeoutSeconds: "seconds",
+      seconds: "seconds",
+      maxRetries: "Maximum retries",
+      retries: "retries",
+      retryAttempts: "attempts",
+      testOrder: "Test order",
+      sequential: "Sequential",
+      random: "Random",
+      parallel: "Parallel tests",
+      enableParallel: "Enable parallel tests",
+      parallelDesc: "Test multiple configurations simultaneously (faster)",
+      maxParallel: "Maximum parallel tests",
+      tests: "tests",
+      enableLogs: "Enable detailed logs",
+      autoStop: "Auto stop when found",
+      saveSettings: "Save Settings",
+    },
+    logs: {
+      title: "Test Log",
+      clear: "Clear",
+      empty: "No logs available",
+      testing: "Testing configuration:",
+      success: "Successful configuration:",
+      failed: "Configuration failed:",
+      timeout: "Timeout for:",
+      cancelled: "Test cancelled",
+      completed: "Test completed",
+      connecting: "Establishing connection...",
+      verifying: "Verifying connectivity...",
+      connectionTimeout: "Connection timeout",
+      internetTestFailed: "Internet test failed",
+      connectionError: "Connection error",
+      noCategory: "No category",
+    },
+    messages: {
+      confirmClose: "Are you sure you want to close? The search will stop.",
+      searchCompleted: "Automatic search completed",
+      configurationFound: "Configuration found:",
+      noConfigurationFound: "No valid configuration found",
+      searchCancelled: "Search cancelled by user",
+    },
+  },
+  terms: {
+    title: "Terms and Conditions",
+    alreadyAccepted: "Terms already accepted",
+    alreadyAcceptedDesc:
+      "You have already accepted our terms and conditions previously.",
+    readToEnd: "Important information",
+    readToEndDesc:
+      "Read to the end to accept the terms and continue using the application.",
+    welcome: {
+      title: "Welcome to JJSecure VPN",
+      subtitle:
+        "By using our application, you accept the following terms and conditions",
+    },
+    buttons: {
+      accepted: "Terms accepted - Continue",
+      accept: "I accept the Terms and Conditions",
+      readToEndFirst: "Read to the end to continue",
+    },
+    sections: {
+      acceptance: {
+        title: "Acceptance of Terms",
+        content:
+          "By accessing and using JJSecure VPN, you confirm that you have read, understood and accept these terms. If you do not agree, you should not use the service.",
+      },
+      service: {
+        title: "Service Description",
+        intro: "JJSecure VPN is a proxy/VPN service that allows you to:",
+        features: [
+          "Browse more privately and securely",
+          "Access geographically restricted content",
+          "Protect your connection on public WiFi networks",
+        ],
+      },
+      usage: {
+        title: "Responsible Use",
+        commitmentLabel: "User commitment:",
+        commitment: "You commit to using the service responsibly and legally.",
+        prohibited: "It is prohibited to use the service for:",
+        prohibitedItems: [
+          "Illegal or malicious activities",
+          "Spam, phishing or malware distribution",
+          "Attacks against other services or users",
+        ],
+      },
+      limitations: {
+        title: "Service Limitations",
+        intro:
+          'The service is provided "as is", with the following considerations:',
+        items: [
+          "There may be occasional interruptions for maintenance",
+          "Speed may vary depending on network congestion",
+          "We reserve the right to limit simultaneous connections",
+        ],
+      },
+      responsibility: {
+        title: "Responsibility and Warranties",
+        limitationLabel: "Limitation of liability:",
+        limitation:
+          "JJSecure VPN is not responsible for direct or indirect damages arising from the use of the service.",
+        userResponsibility:
+          "The user is solely responsible for their activities while using the service.",
+      },
+      refund: {
+        title: "Refund and Login Purchase",
+        policyLabel: "Refund policy:",
+        policy:
+          "In case a user purchases a login to access the service, they will be entitled to a refund only if it is proven that the problem is related to our servers and not to carrier blocks.",
+        process:
+          "To request a refund, the user must provide proof of the problem and await analysis by our technical team.",
+        freezingTitle: "Plan freezing",
+        freezingDesc:
+          "In cases of blocks by telephone carriers, plans will be automatically frozen until a new functional method is found. Once the block is resolved, all remaining days in your plan will be restored.",
+        importantLabel: "Important:",
+        important:
+          "No refunds will be made for problems related to carrier blocks or user connectivity issues, but paid days will be preserved through the freezing system.",
+      },
+      modifications: {
+        title: "Modifications",
+        content:
+          "We reserve the right to modify these terms at any time. Changes will take effect immediately after publication.",
+      },
+      contact: {
+        title: "Contact and Support",
+        content: "For inquiries or support, contact us via Telegram",
+        supportLink: "@SoporteJHS_bot",
+      },
+    },
+    footer: {
+      lastUpdate: "Last update:",
+      company: "JJSECURE VPN",
+    },
+  },
+  privacy: {
+    title: "Privacy Policy",
+    alreadyAccepted: "Policy already accepted",
+    alreadyAcceptedDesc:
+      "You have already accepted our privacy policy previously.",
+    readToEnd: "Important information",
+    readToEndDesc:
+      "Read to the end to accept the policy and continue using the application.",
+    intro: {
+      title: "Your privacy is important",
+      subtitle:
+        "This policy explains how we collect, use and protect your information when using JJSecure VPN",
+    },
+    buttons: {
+      accepted: "Policy already accepted - Continue",
+      accept: "I accept the Privacy Policy",
+      readToEndFirst: "Read to the end to continue",
+    },
+    sections: {
+      collection: {
+        title: "Information We Collect",
+        intro: "For the service to function, we collect minimal information:",
+        items: [
+          "Device ID (automatically removed every 24 hours)",
+          "Basic connection information for limit control",
+          "Technical data necessary for proxy operation",
+        ],
+      },
+      usage: {
+        title: "Use of Information",
+        intro: "The collected information is used exclusively to:",
+        items: [
+          "Control simultaneous connection limits",
+          "Maintain service stability",
+          "Provide technical support when necessary",
+        ],
+      },
+      protection: {
+        title: "Data Protection",
+        commitmentLabel: "Security commitment:",
+        commitment:
+          "We do not store browsing history, communication content or identifiable personal data.",
+        autoDelete:
+          "Temporary data (such as Device ID) is automatically deleted from our servers every 24 hours.",
+      },
+      sharing: {
+        title: "Information Sharing",
+        policyLabel: "Strict policy:",
+        policy:
+          "We do not sell, rent or share your personal information with third parties.",
+        legalRequirement:
+          "We could only disclose information if required by law and with a valid court order.",
+      },
+      rights: {
+        title: "Your Rights",
+        intro: "As a user, you have the right to:",
+        items: [
+          "Request information about the data we store",
+          "Request deletion of your data",
+          "Stop using the service at any time",
+        ],
+      },
+      contact: {
+        title: "Contact",
+        content: "For privacy inquiries, contact us via Telegram",
+        supportLink: "@SoporteJHS_bot",
+      },
+    },
+    footer: {
+      lastUpdate: "Last update:",
+      company: "JJSECURE VPN",
+    },
+  },
+  bottomSheetServerSelector: {
+    serverInfo: {
+      selectServer: "SELECT SERVER",
+      selectServerDesc: "Tap to choose a configuration",
+      freeServersTooltip: "View available free servers",
+    },
+    connectionButtons: {
+      vpnStates: {
+        connected: "DISCONNECT",
+        connecting: "CANCEL",
+        stopping: "STOPPING",
+        auth: "CANCEL",
+        noNetwork: "RETRY",
+        authFailed: "RETRY",
+        disconnected: "CONNECT",
+      },
+      logsButton: "LOGS",
+      logsTooltip: "View connection logs",
+    },
+    premiumFeatures: {
+      title: "Premium Features",
+      upgradeButton: "Upgrade to Premium",
+      features: {
+        globalCoverage: {
+          title: "Global coverage",
+          description: "Over 14900 server locations in 122 countries",
+        },
+        fasterBrowsing: {
+          title: "Faster browsing",
+          description: "Browse at even higher speeds (up to 10 Gbps)",
+        },
+        advancedSecurity: {
+          title: "Advanced Security",
+          description: "AES-256 encryption and kill switch",
+        },
+      },
+    },
+  },
+  freeServersInfoModal: {
+    title: "Free Servers",
+    subtitle: "All our free servers go through secure official channels",
+    stats: {
+      freeServers: "Free Servers",
+      premiumServers: "Premium Servers",
+    },
+    availableConnections: "Available Free Connections",
+    selectFreeServer: "Select a free server:",
+    serverDescription: "Official channel • Stable connection",
+    moreServersAvailable: "+{count} more servers available",
+    upgradeTitle: "Want more speed?",
+    upgradeMessage: "Upgrade to Premium for {count} exclusive servers",
+    upgradeButton: "Upgrade to Premium",
+    closeButton: "Close",
+    loadError: "Error loading servers:",
+  },
+  footer: {
+    tabs: {
+      home: "HOME",
+      servers: "SERVERS",
+      logs: "LOGS",
+      profile: "PROFILE",
+      settings: "SETTINGS",
+    },
+  },
+  userProfileScreen: {
+    header: {
+      myAccount: "My Account",
+      configuration: "Configuration",
+      connected: "Connected",
+      configureCredentials: "Configure credentials",
+    },
+    disconnectedContent: {
+      configureAccess: "Configure Access",
+      configureAccessDesc: "Enter your credentials to connect",
+      secureConnection: "Secure connection",
+      secureConnectionDesc:
+        "Your credentials are stored securely on your device and only used for VPN authentication.",
+    },
+    accountPanel: {
+      days: "days",
+      active: "Active",
+      expired: "Expired",
+      aboutToExpire: "Expiring soon",
+      expiresOn: "Expires",
+      expiredLabel: "expired",
+      inDays: "in {count} day{plural}",
+      connections: "Connections",
+      activeConnections: "Active",
+      limit: "Limit",
+      renewWarningTitle: "Your account is about to expire",
+      renewWarningDesc:
+        "Renew now to maintain your access without interruptions.",
+      renewSubscription: "Renew subscription",
+      contactSupport: "Contact support",
+    },
+    sessionStats: {
+      session: "Session",
+      ping: "Ping",
+      download: "Download",
+      upload: "Upload",
+      downloadSpeed: "Down Speed",
+      uploadSpeed: "Up Speed",
+      network: "Network",
+      localIP: "Local IP",
+    },
+    deviceInfo: {
+      device: "Device",
+      deviceId: "ID",
+      version: "Version",
+      copyIdLabel: "Copy ID",
+    },
+    recentConfigs: {
+      recent: "Recent",
+      config: "Config",
+    },
+    errors: {
+      serverError: "Server error",
+      userNotFound: "User not found on this server",
+      processingError: "Error processing user data",
+      dtunnelNotAvailable: "DTunnel function not available",
+      timeout: "Timeout: No response received from server",
+      queryError: "Error executing user query",
+    },
+  },
+  credentialsPanel: {
+    header: {
+      hysteria: "HYSTERIA Protocol",
+      v2ray: "V2Ray Protocol",
+      ssh: "SSH Authentication",
+    },
+    headerDesc: {
+      hysteria: "Automatically combines username and password",
+      ssh: "Configure access credentials",
+    },
+    hysteriaTitle: "HYSTERIA Credentials",
+    usernameLabel: "Username",
+    passwordLabel: "Password",
+    usernamePlaceholder: "Enter your username",
+    passwordPlaceholder: "Enter your password",
+    uuidLabel: "V2Ray UUID",
+    uuidPlaceholder: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    connecting: "Connecting to server...",
+    errors: {
+      userRequired: "Username is required",
+      passwordRequired: "Password is required",
+      uuidRequired: "UUID is required",
+      uuidInvalid: "Invalid UUID format",
+    },
+    buttons: {
+      saving: "Saving...",
+      save: "Save Credentials",
+    },
+    secureInfo: {
+      title: "Secure credentials:",
+      desc: "Stored locally on your device",
+      connectNote: "To connect, use the CONNECT button on the main screen",
+    },
+    preconfigured: {
+      title: "Direct connection",
+      description:
+        "This server is configured for direct connection. It might fail if not enabled or available. If it doesn't connect, try another server.",
+      actionLabel: "Go to Connect",
+      readyBadge: "Ready",
+      changeServerLabel: "Change server",
+    },
+  },
+  serverSelectorScreen: {
+    header: {
+      selectServer: "Select Server",
+      categories: "Categories",
+      backToCategories: "Back to Categories",
+      nativeMode: "NATIVE",
+      customMode: "CUSTOM",
+    },
+    searchBar: {
+      placeholder: "Search servers...",
+      clearSearch: "Clear search",
+    },
+    categoryView: {
+      activeConfig: "Active configuration",
+      serverCount: "{count} server{plural}",
+      selectCategory: "Select category",
+    },
+    serverView: {
+      serversList: "Servers List",
+      noServersFound: "No servers found",
+      retrySearch: "Try again",
+      configuring: "Configuring...",
+      connecting: "Connecting...",
+    },
+    loadingView: {
+      loadingServers: "Loading servers...",
+      updating: "Updating...",
+      noServersAvailable: "No servers available",
+      updateConfigs: "Update configurations",
+    },
+    errorView: {
+      loadError: "Load error",
+      connectionFailed: "Connection failed",
+      retry: "Retry",
+      useNativeSelector: "Use native selector",
+      errorDetails: "Error details",
+    },
+    serverCard: {
+      premium: "Premium",
+      free: "Free",
+      recommended: "Recommended",
+      connecting: "Connecting",
+      connected: "Connected",
+      select: "Select",
+      ping: "Ping",
+      load: "Load",
+      unavailable: "Unavailable",
+    },
+    filters: {
+      allServers: "All servers",
+      freeServers: "Free servers",
+      premiumServers: "Premium servers",
+      recommendedServers: "Recommended servers",
+    },
+    actions: {
+      refresh: "Refresh",
+      settings: "Settings",
+      help: "Help",
+      close: "Close",
+    },
+    countries: {
+      MX: "Mexico",
+      PE: "Peru",
+      ES: "Spain",
+      NL: "Netherlands",
+      CA: "Canada",
+      JP: "Japan",
+      US: "United States",
+      GB: "United Kingdom",
+      FR: "France",
+      DE: "Germany",
+      BR: "Brazil",
+      AR: "Argentina",
+    },
+    subcategories: {
+      premiumSsh: {
+        title: "🏆 MAIN",
+        description: "Recommended configuration • Unlimited internet",
+      },
+      premiumCm: {
+        title: "FREEZE DATA",
+        description: "Use with caution",
+      },
+      udpHysteria: {
+        title: "UDP HYSTERIA",
+        description: "Optimized UDP protocol",
+      },
+      premiumVpn: {
+        title: "PREMIUM VPN",
+        description: "IP masking with data",
+      },
+      premiumDns: {
+        title: "PREMIUM DNS",
+        description: "No Ads",
+      },
+      premiumGames: {
+        title: "PREMIUM GAMES",
+        description: "Gaming Support",
+      },
+      others: {
+        title: "Others",
+      },
+    },
+    categoryTypes: {
+      premium: "PREMIUM",
+      free: "FREE",
+      emergency: "EMERGENCY",
+    },
+  },
+};

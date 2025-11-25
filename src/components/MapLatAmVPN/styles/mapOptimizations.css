@@ -1,0 +1,117 @@
+/**
+ * @file mapOptimizations.css
+ * @description Optimizaciones CSS específicas para mejor rendimiento
+ */
+
+/* OPTIMIZACIÓN: Estilos para dispositivos de bajo rendimiento */
+.low-performance .efficient-pulse-circle,
+.low-performance .simple-ring {
+  animation: none !important; /* Desactivar todas las animaciones */
+}
+
+.low-performance .map-marker-group {
+  will-change: auto !important; /* Reducir will-change en dispositivos lentos */
+}
+
+/* OPTIMIZACIÓN: Usar contain para aislar re-layouts */
+.map-container {
+  contain: layout style paint;
+  transform: translateZ(0); /* Forzar compositing layer */
+}
+
+/* OPTIMIZACIÓN: Reducir complejidad visual en dispositivos lentos */
+.low-performance .map-background {
+  background: #1e293b !important; /* Fondo sólido en lugar de gradientes */
+}
+
+.low-performance .map-marker-group defs {
+  display: none !important; /* Eliminar gradientes complejos */
+}
+
+/* OPTIMIZACIÓN: Animaciones más simples para mejor rendimiento */
+@keyframes minimal-pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.performance-mode .efficient-pulse-circle {
+  animation: minimal-pulse 3s ease-in-out infinite;
+  transform: none !important; /* Solo cambiar opacity, no transform */
+}
+
+/* OPTIMIZACIÓN: Contenedor con optimizaciones GPU */
+.optimized-map-container {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  isolation: isolate;
+}
+
+/* OPTIMIZACIÓN: Reducir repaints durante animaciones */
+.map-transitioning .map-marker-group {
+  will-change: transform, opacity;
+}
+
+.map-stable .map-marker-group {
+  will-change: auto;
+}
+
+/* OPTIMIZACIÓN: Contenido crítico above-the-fold */
+.map-critical-content {
+  contain: strict;
+  content-visibility: auto;
+}
+
+/* OPTIMIZACIÓN: Lazy loading para elementos no críticos */
+.map-non-critical {
+  content-visibility: auto;
+  contain-intrinsic-size: 400px 300px;
+}
+
+/* OPTIMIZACIÓN: Prefiere motion reducida */
+@media (prefers-reduced-motion: reduce) {
+  .efficient-pulse-circle,
+  .simple-ring,
+  .map-transitioning {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* OPTIMIZACIÓN: Ajustes para dispositivos con poca memoria */
+@media (max-width: 480px) and (pointer: coarse) {
+  .map-marker-group circle {
+    paint-order: fill stroke markers; /* Optimizar orden de pintado */
+  }
+  
+  .efficient-pulse-circle {
+    animation-duration: 4s; /* Animaciones más lentas en móvil */
+  }
+}
+
+/* OPTIMIZACIÓN: Contenido fuera de viewport */
+.map-offscreen {
+  content-visibility: hidden;
+  contain-intrinsic-size: 800px 450px;
+}
+
+/* OPTIMIZACIÓN: Forzar aceleración hardware solo cuando sea beneficioso */
+.needs-acceleration {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* OPTIMIZACIÓN: Grid virtual para grandes datasets */
+.virtual-map-grid {
+  contain: size layout style paint;
+  overflow: hidden;
+}
+
+/* OPTIMIZACIÓN: Reducir elementos DOM en animaciones */
+.minimal-marker circle:nth-child(n+3) {
+  display: none; /* Ocultar elementos decorativos en modo mínimo */
+}

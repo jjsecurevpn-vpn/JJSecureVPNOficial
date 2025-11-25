@@ -1,0 +1,48 @@
+/* ============================= */
+/* Animaciones de mapa unificadas */
+/* ============================= */
+  @keyframes map-proton-pulse-base {
+    0%,100% { opacity:.9; transform:translateZ(0) scale(1.4); }
+    50% { opacity:.6; transform:translateZ(0) scale(var(--pulse-scale,2.8)); }
+  }
+  @keyframes map-marker-enter {
+    0% { opacity:0; transform:scale(0) translateZ(0); }
+    50% { opacity:.8; transform:scale(1.2) translateZ(0); }
+    100% { opacity:1; transform:scale(1) translateZ(0); }
+  }
+  @keyframes map-connection-ripple {
+    0% { opacity:.9; transform:scale(.8) translateZ(0); }
+    50% { opacity:.3; transform:scale(2.5) translateZ(0); }
+    100% { opacity:0; transform:scale(4) translateZ(0); }
+  }
+
+/* Clases de animación estado VPN
+  Nota: Se mantienen solo aquí como fuente única de truth para pulsos.
+  Evitar redefinir en otros archivos (mapEffects.css contiene variantes específicas -> candidato a unificarse) */
+.animate-proton-connected { animation: map-proton-pulse-base 4s ease-in-out infinite; --pulse-scale:2.8; }
+.animate-proton-connecting { animation: map-proton-pulse-base 2.5s ease-in-out infinite; --pulse-scale:2.7; }
+.animate-proton-disconnected { animation: map-proton-pulse-base 4.5s ease-in-out infinite; --pulse-scale:2.5; }
+
+/* Otras animaciones */
+.animate-marker-enter { animation: map-marker-enter .6s cubic-bezier(.175,.885,.32,1.275); }
+.animate-connection-ripple { animation: map-connection-ripple 2s ease-out infinite; }
+
+/* ============================= */
+/* Clases base del mapa (deduplicadas) */
+/* ============================= */
+.map-marker-group { transform:translateZ(0); transform-origin:center center; will-change:transform; }
+.map-marker { transition:none; transform:translateZ(0); }
+.map-zoom-group { transition:none; }
+.map-transitioning { transition:opacity .3s ease-out; }
+.map-stable { transition:none; }
+/* Placeholders legacy eliminados (no aportan estilos). Si se necesitan hooks, usar data-attributes en JSX */
+
+/* Modo reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .animate-proton-connected,
+  .animate-proton-connecting,
+  .animate-proton-disconnected,
+  .animate-connection-ripple {
+    animation: none !important;
+  }
+}

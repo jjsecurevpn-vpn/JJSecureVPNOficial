@@ -1,0 +1,178 @@
+/* Estilos inspirados en la estética moderna tipo Proton VPN (oscuridad limpia + acentos verdes) */
+:root {
+  --wel-bg-base: #0f1114;
+  --wel-bg-alt: #14171b;
+  --wel-panel: linear-gradient(145deg, rgba(28,32,38,0.85), rgba(20,23,27,0.85));
+  --wel-panel-border: rgba(255,255,255,0.06);
+  --wel-panel-outline: rgba(90,255,190,0.12);
+  --wel-accent: #31d694;
+  --wel-accent-alt: #24b978;
+  --wel-accent-soft: #48e7a4;
+  --wel-accent-radial: radial-gradient(circle at 30% 25%, rgba(72,231,164,0.18), transparent 60%);
+  --wel-focus: 0 0 0 2px rgba(72,231,164,0.55), 0 0 0 5px rgba(72,231,164,0.18);
+  --wel-text-strong: #f5f7fa;
+  --wel-text-soft: #c8ced5;
+  --wel-text-dim: #828b94;
+  /* Gradiente simplificado (menos capas para menor coste de composición) */
+  --wel-gradient-hero: linear-gradient(165deg,#121519 0%, #0f1114 55%, #12161b 100%);
+  /* Sombras simplificadas para reducir overdraw */
+  --wel-btn-shadow: 0 2px 10px -2px rgba(0,0,0,0.6);
+  --wel-btn-shadow-hover: 0 3px 14px -3px rgba(0,0,0,0.65);
+}
+
+/* Fondo específico removido (.welcome-root-bg) para unificación: ahora se usa sólo body.welcome-bg-overwrite */
+
+/* Panel principal */
+.welcome-panel {
+  /* Fondo sólido semi-opaco para evitar coste de blur */
+  background: rgba(22,26,30,0.9);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 24px;
+  box-shadow: 0 4px 18px -6px rgba(0,0,0,0.55);
+  position: relative;
+}
+/* Eliminados pseudo-elementos ::before / ::after para reducir capas */
+
+/* Chip/Badge */
+.wel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .4px;
+  background: linear-gradient(140deg, rgba(49,214,148,0.18), rgba(49,214,148,0.07));
+  color: var(--wel-accent-soft);
+  border: 1px solid rgba(72,231,164,0.35);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(72,231,164,0.25), 0 2px 4px -2px rgba(0,0,0,0.65);
+}
+
+/* Títulos */
+.wel-title {
+  color: var(--wel-text-strong);
+  font-weight: 600;
+  letter-spacing: .5px;
+}
+.wel-subtitle {
+  color: var(--wel-text-soft);
+  font-weight: 400;
+}
+
+/* Botones */
+.wel-btn-primary {
+  background: #27c782;
+  color: #071d13;
+  font-weight: 600;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-size: 15px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: var(--wel-btn-shadow);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.wel-btn-primary:hover { background:#30d48d; }
+.wel-btn-primary:active { background:#1fa46a; transform:translateY(1px); }
+.wel-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(72,231,164,0.55); }
+
+/* Variante de alto contraste para destacar acción principal */
+.wel-btn-primary-contrast {
+  position: relative;
+  background: linear-gradient(150deg,#3affb2 0%,#27d289 55%,#17a965 100%);
+  color: #041d12;
+  font-weight: 700;
+  letter-spacing: .3px;
+  border-radius: 20px;
+  padding: 18px 22px;
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  box-shadow: 0 6px 24px -6px rgba(0,0,0,0.65),0 2px 10px -2px rgba(0,0,0,0.55),0 0 0 1px rgba(90,255,200,0.35),0 0 0 4px rgba(72,231,164,0.15);
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: all .2s ease;
+}
+.wel-btn-primary-contrast:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 8px 28px -6px rgba(0,0,0,0.7),0 3px 14px -2px rgba(0,0,0,0.55),0 0 0 1px rgba(90,255,200,0.55),0 0 0 5px rgba(72,231,164,0.20);
+  transform: translateY(-2px);
+}
+.wel-btn-primary-contrast:active {
+  transform: translateY(0);
+  filter: brightness(.95);
+}
+.wel-btn-primary-contrast:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.6),0 0 0 6px rgba(72,231,164,0.35);
+}
+
+.wel-btn-secondary {
+  background: rgba(72,231,164,0.08);
+  color: var(--wel-text-soft);
+  font-weight: 500;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  border: 1px solid rgba(72,231,164,0.22);
+  box-shadow: 0 2px 10px -2px rgba(0,0,0,.5);
+  transition: background .18s ease, box-shadow .18s ease;
+}
+.wel-btn-secondary:hover { background: rgba(72,231,164,0.12); }
+.wel-btn-secondary:active { background: rgba(72,231,164,0.18); }
+.wel-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(72,231,164,0.55); }
+
+.wel-btn-ghost {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--wel-text-soft);
+  border-radius: 14px;
+  padding: 12px 16px;
+  font-size: 13px;
+  display: flex; align-items:center; justify-content:center; gap: 8px;
+  transition: background .18s ease, color .18s ease;
+}
+.wel-btn-ghost:hover { background: rgba(255,255,255,0.07); color: #fff; }
+.wel-btn-ghost:active { background: rgba(255,255,255,0.12); }
+.wel-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(72,231,164,0.55); }
+
+/* Texto legal / footer */
+.wel-legal { color: var(--wel-text-dim); font-size: 11px; line-height: 1.5; }
+.wel-legal a { color: var(--wel-accent-soft); text-decoration: underline; }
+.wel-legal a:hover { color: var(--wel-accent); }
+
+/* Animación leve de resplandor pulsante */
+@keyframes wel-pulse-soft { 0%,100% { opacity: .55 } 50% { opacity: .9 } }
+
+/* Cursor virtual adaptación a paleta */
+.virtual-cursor-green {
+  background: radial-gradient(circle at 35% 35%, #48e7a4 0%, #24b978 70%);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.55), 0 4px 16px -2px rgba(0,0,0,0.7), 0 0 0 6px rgba(72,231,164,0.25);
+}
+.virtual-cursor-green::after { background: radial-gradient(circle, rgba(72,231,164,0.32), transparent 70%); }
+
+/* Nuevo cursor tipo pointer SVG */
+.virtual-cursor-pointer {
+  color: #3ff2ad;
+  filter: drop-shadow(0 0 4px rgba(72,231,164,0.55)) drop-shadow(0 4px 10px rgba(0,0,0,0.65));
+  position: relative;
+  transition: transform .18s ease, filter .25s ease, color .25s ease;
+}
+.virtual-cursor-pointer::after {
+  content: '';
+  position: absolute;
+  inset: -16px;
+  background: radial-gradient(circle at 50% 50%, rgba(72,231,164,0.25), transparent 70%);
+  opacity: .55;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.virtual-cursor-pointer:hover::after { opacity: .75; }
+.virtual-cursor-pointer .cursor-shape { display: block; }
+.virtual-cursor-pointer:active { transform: scale(.92); filter: drop-shadow(0 0 2px rgba(72,231,164,0.75)) drop-shadow(0 2px 6px rgba(0,0,0,0.7)); }
+
+/* Overwrite global morado background when welcome is active */
+body.welcome-bg-overwrite, body.welcome-bg-overwrite #root {
+  /* Sin background-attachment: fixed (coste extra en scroll/composición) */
+  background: var(--wel-gradient-hero) !important;
+}

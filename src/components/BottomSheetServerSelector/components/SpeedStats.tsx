@@ -4,7 +4,6 @@ import type { NetSpeedsResult } from "../../../hooks/useNetSpeeds";
 interface SpeedStatsProps {
   netSpeeds: NetSpeedsResult;
   isConnected: boolean;
-  speedsBootstrapped: boolean;
 }
 
 export function SpeedStats({

@@ -3,8 +3,8 @@ import { useTranslations } from '../../../../hooks/useTranslations';
 
 function openNativeLogs() {
   try {
-    if (typeof window !== 'undefined' && (window as any).DtShowLoggerDialog) {
-      (window as any).DtShowLoggerDialog.execute();
+    if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).DtShowLoggerDialog) {
+      ((window as unknown as Record<string, unknown>).DtShowLoggerDialog as { execute: () => void }).execute();
     }
   } catch {}
 }

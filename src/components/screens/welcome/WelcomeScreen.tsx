@@ -86,8 +86,8 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinue, onBuyP
         paddingBottom: `calc(${responsive.isSmall ? 24 : 48}px + max(${navigationBarHeight}px, env(safe-area-inset-bottom, 0px)))`,
         transition: 'padding 200ms ease',
         boxSizing: 'border-box',
-        ['--safe-top' as any]: `${statusBarHeight}px`,
-        ['--safe-bottom' as any]: `${navigationBarHeight}px`,
+        ['--safe-top' as unknown as string]: `${statusBarHeight}px`,
+        ['--safe-bottom' as unknown as string]: `${navigationBarHeight}px`,
       }}
     >
         <div className="flex flex-col w-full items-center justify-center">
@@ -143,7 +143,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinue, onBuyP
                 {t.welcome.termsAcceptance}{' '}
                 <button
                   onClick={() => {
-                    const url = 'https://web.jhservices.com.ar/terminos-y-condiciones';
+                    const url = 'https://shop.jhservices.com.ar/terminos';
                     if (window.DtStartWebViewActivity) window.DtStartWebViewActivity.execute(url);
                     else if (window.DtOpenWebview) window.DtOpenWebview.execute(url);
                     else window.open(url,'_blank');

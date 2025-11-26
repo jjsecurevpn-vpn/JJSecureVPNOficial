@@ -22,7 +22,7 @@ export interface DtunnelEventPayloads {
     name: string;
     description: string;
     mode: string;
-    [key: string]: any;
+    [key: string]: string | number | boolean | undefined;
   };
   
   // Eventos de VPN
@@ -56,8 +56,8 @@ export type DtunnelEventName = keyof DtunnelEventPayloads;
 
 // ===== SISTEMA DE EVENTOS UNIFICADO =====
 class UnifiedEventsSystem {
-  private listeners: Map<string, Set<Function>> = new Map();
-  private nativeListeners: Map<string, Function> = new Map();
+  private listeners: Map<string, Set<(payload: unknown) => void>> = new Map();
+  private nativeListeners: Map<string, (payload: unknown) => void> = new Map();
   private isInitialized = false;
 
   /**
@@ -74,6 +74,7 @@ class UnifiedEventsSystem {
    * Configura la captura de eventos nativos
    */
   private setupNativeEventCapture(): void {
+    const w = window as unknown as Record<string, unknown>;
     // Lista de todos los eventos nativos posibles
     const nativeEvents: DtunnelEventName[] = [
       'DtCheckUserStartedEvent',
@@ -95,13 +96,13 @@ class UnifiedEventsSystem {
 
     // Configurar interceptores para cada evento nativo
     nativeEvents.forEach(eventName => {
-      const nativeHandler = (payload: any) => {
+      const nativeHandler = (payload: unknown) => {
         console.log(`📡 Evento nativo recibido: ${eventName}`, payload);
-        this.emit(eventName, payload);
+        this.emit(eventName, payload as DtunnelEventPayloads[typeof eventName]);
       };
 
       // Registrar el handler en window para que DTunnel lo llame
-      (window as any)[eventName] = nativeHandler;
+      w[eventName] = nativeHandler;
       this.nativeListeners.set(eventName, nativeHandler);
     });
   }
@@ -117,7 +118,7 @@ class UnifiedEventsSystem {
       this.listeners.set(eventName, new Set());
     }
     
-    this.listeners.get(eventName)!.add(callback);
+    this.listeners.get(eventName)!.add(callback as (payload: unknown) => void);
     
     // Retorna función para remover el listener
     return () => {
@@ -134,7 +135,7 @@ class UnifiedEventsSystem {
   ): void {
     const eventListeners = this.listeners.get(eventName);
     if (eventListeners) {
-      eventListeners.delete(callback);
+      eventListeners.delete(callback as (payload: unknown) => void);
       
       // Si no quedan listeners, remover el set
       if (eventListeners.size === 0) {
@@ -173,7 +174,7 @@ class UnifiedEventsSystem {
     const unsubscribers: Array<() => void> = [];
     
     Object.entries(listeners).forEach(([eventName, callback]) => {
-      const unsubscribe = this.on(eventName as T, callback as any);
+      const unsubscribe = this.on(eventName as T, callback as unknown as (payload: unknown) => void);
       unsubscribers.push(unsubscribe);
     });
     
@@ -229,7 +230,7 @@ class UnifiedEventsSystem {
     
     // Remover listeners nativos
     this.nativeListeners.forEach((_, eventName) => {
-      delete (window as any)[eventName];
+      delete (window as unknown as Record<string, unknown>)[eventName];
     });
     this.nativeListeners.clear();
     

@@ -58,11 +58,20 @@ export const getCleanCategoryName = (categoryName: string): string => {
 /**
  * Obtiene los estilos visuales para un tipo de categoría
  */
-export const getCategoryTypeStyles = (type: CategoryType, translations?: any) => {
+export const getCategoryTypeStyles = (type: CategoryType, translations?: Record<string, unknown>) => {
+  let categoryTypes: Record<string, unknown> | undefined;
+  
+  if (translations && typeof translations === 'object' && 'serverSelectorScreen' in translations) {
+    const serverScreen = translations['serverSelectorScreen'] as unknown;
+    if (serverScreen && typeof serverScreen === 'object' && 'categoryTypes' in (serverScreen as Record<string, unknown>)) {
+      categoryTypes = ((serverScreen as Record<string, unknown>)['categoryTypes'] as unknown) as Record<string, unknown>;
+    }
+  }
+  
   const texts = {
-    premium: translations?.serverSelectorScreen?.categoryTypes?.premium || 'PREMIUM',
-    free: translations?.serverSelectorScreen?.categoryTypes?.free || 'GRATUITO',
-    emergency: translations?.serverSelectorScreen?.categoryTypes?.emergency || 'EMERGENCIAS'
+    premium: (categoryTypes?.['premium'] as string | undefined) || 'PREMIUM',
+    free: (categoryTypes?.['free'] as string | undefined) || 'GRATUITO',
+    emergency: (categoryTypes?.['emergency'] as string | undefined) || 'EMERGENCIAS'
   };
 
   // Estilos minimalistas (sin gradientes) manteniendo buen contraste

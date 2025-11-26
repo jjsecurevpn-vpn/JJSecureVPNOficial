@@ -8,7 +8,7 @@ interface InputFieldProps {
   showToggle?: boolean;
   shown?: boolean;
   onToggle?: () => void;
-  sizeConfig: any;
+  sizeConfig: Record<string, unknown>;
   mono?: boolean;
   compact?: boolean;
 }
@@ -16,10 +16,12 @@ interface InputFieldProps {
 export const InputField: React.FC<InputFieldProps> = ({
   type = 'text', value, placeholder, onChange,
   showToggle, shown, onToggle, sizeConfig, mono, compact
-}) => (
+}) => {
+  const config = sizeConfig as Record<string, unknown>;
+  return (
   <div className={showToggle ? 'relative' : ''}>
     <input
-      className={`w-full ${sizeConfig.padding} ${showToggle ? 'pr-10' : ''} ${compact ? 'text-xs' : sizeConfig.textSize} ${sizeConfig.borderRadius} ${mono ? 'font-mono' : ''} bg-surface/50 border border-surface-border focus:border-brand focus:outline-none text-neutral-strong placeholder-neutral-text`}
+      className={`w-full ${config.padding} ${showToggle ? 'pr-10' : ''} ${compact ? 'text-xs' : config.textSize} ${config.borderRadius} ${mono ? 'font-mono' : ''} bg-surface/50 border border-surface-border focus:border-brand focus:outline-none text-neutral-strong placeholder-neutral-text`}
       type={showToggle && shown ? 'text' : type}
       placeholder={placeholder}
       value={value}
@@ -28,11 +30,12 @@ export const InputField: React.FC<InputFieldProps> = ({
     {showToggle && onToggle && (
       <button
         type="button"
-        className={`absolute right-2 top-1/2 -translate-y-1/2 ${sizeConfig.buttonPadding} rounded hover:bg-surface-border/50`}
+        className={`absolute right-2 top-1/2 -translate-y-1/2 ${config.buttonPadding} rounded hover:bg-surface-border/50`}
         onClick={onToggle}
       >
-        {shown ? sizeConfig.icons.eyeOff : sizeConfig.icons.eye}
+        {shown ? ((config.icons as Record<string, unknown>).eyeOff as React.ReactNode) : ((config.icons as Record<string, unknown>).eye as React.ReactNode)}
       </button>
     )}
   </div>
 );
+};

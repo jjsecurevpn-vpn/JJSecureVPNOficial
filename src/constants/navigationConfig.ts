@@ -10,7 +10,7 @@ export interface TabItem {
   id: string;
   label: string;
   icon: typeof Home;
-  iconProps?: Record<string, any>;
+  iconProps?: Record<string, unknown>;
 }
 
 export const getFooterTabs = (t: Translations): TabItem[] => [

@@ -118,26 +118,27 @@ function App() {
     );
 
     if (typeof window !== "undefined") {
-      (window as any).resetWelcome = () => {
+      const w = window as unknown as Record<string, unknown>;
+      w.resetWelcome = () => {
         resetWelcomeScreen();
         setShowWelcomeScreen(true);
         console.log("Welcome screen reset - will show on next app start");
       };
 
-      (window as any).showWelcome = () => {
+      w.showWelcome = () => {
         setShowWelcomeScreen(true);
         console.log("Welcome screen shown");
       };
 
       // Función para resetear el tutorial y simular primera vez
-      (window as any).resetTutorial = () => {
+      w.resetTutorial = () => {
         localStorage.removeItem("jjsecure-tutorial-completed");
         console.log("Tutorial reset - will show on next visit");
         window.location.reload(); // Recargar para aplicar el cambio
       };
 
       // Exponer el sistema de recuperación para debugging
-      (window as any).nativeRecovery = nativeRecovery;
+      w.nativeRecovery = nativeRecovery;
 
       // Nuevo evento global para mostrar notificaciones enriquecidas
     }
@@ -202,10 +203,11 @@ function App() {
     // Método alternativo para la barra de navegación
     if (
       typeof window !== "undefined" &&
-      (window as any).Android &&
-      (window as any).Android.setNavigationBarColor
+      (window as unknown as Record<string, unknown>).Android
     ) {
-      (window as any).Android.setNavigationBarColor(androidNavigationBarColor);
+      const w = window as unknown as Record<string, unknown>;
+      const android = w.Android as Record<string, (color: string) => void>;
+      android.setNavigationBarColor?.(androidNavigationBarColor);
     }
 
     // También intentar con el meta tag estándar para PWA
@@ -220,8 +222,10 @@ function App() {
     }
 
     // Método adicional para asegurar que se aplique
-    if (typeof window !== "undefined" && (window as any).setStatusBarColor) {
-      (window as any).setStatusBarColor(androidNavigationBarColor);
+    if (typeof window !== "undefined") {
+      const w = window as unknown as Record<string, unknown>;
+      const setStatusBar = w.setStatusBarColor as ((color: string) => void) | undefined;
+      setStatusBar?.(androidNavigationBarColor);
     }
   }, []);
 
@@ -234,10 +238,10 @@ function App() {
           saveRecentConnection({
             id: activeConfig.id,
             name: activeConfig.name,
-            category_id: activeConfig.category_id,
-            categoryName: activeConfig.categoryName || "Sin categoría",
+            category_id: activeConfig.category_id as number,
+            categoryName: String(activeConfig.categoryName || "Sin categoría"),
             categoryColor:
-              activeConfig.categoryColor || "rgb(var(--primary-600))",
+              String(activeConfig.categoryColor || "rgb(var(--primary-600))"),
             mode: activeConfig.mode,
           });
         }
@@ -261,10 +265,10 @@ function App() {
   const handleWelcomeBuyPremium = () => {
     // Abre el enlace externo en webview
     if (window.DtOpenWebview) {
-      window.DtOpenWebview.execute("https://web.jhservices.com.ar/planes");
+      window.DtOpenWebview.execute("https://shop.jhservices.com.ar/planes");
     } else {
       // Fallback para desarrollo
-      window.open("https://web.jhservices.com.ar/planes", "_blank");
+      window.open("https://shop.jhservices.com.ar/planes", "_blank");
     }
   };
 
@@ -531,7 +535,7 @@ function App() {
                             "missingsetup",
                           ].includes(String(currentModal))
                         ) {
-                          const notification = { type: currentModal as any };
+                          const notification = { type: currentModal as "missingcredentials" | "missingserver" | "missingsetup" };
                           return (
                             <ModalComponent
                               isOpen={true}

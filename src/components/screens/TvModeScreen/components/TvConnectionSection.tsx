@@ -3,6 +3,7 @@ import { useTranslations } from '../../../../hooks/useTranslations';
 import { ResponsiveConnectionButton } from './ResponsiveConnectionButton';
 import { ResponsiveLogsButton } from './ResponsiveLogsButton';
 import { StepSection } from './StepSection';
+import type { ConfigItem } from '../../../../types/config';
 
 interface TvConnectionSectionProps {
   headerSize: 'small' | 'medium' | 'large';
@@ -11,10 +12,10 @@ interface TvConnectionSectionProps {
   spacing: number;
   fontSize: 'small' | 'base' | 'large';
   contentJustifyClass: string;
-  activeConfig: any;
+  activeConfig: ConfigItem | null;
   formError: string | null;
-  vpn: any;
-  onConnection: () => any;
+  vpn: Record<string, unknown>;
+  onConnection: () => Record<string, unknown>;
   showServerDescription: boolean;
 }
 

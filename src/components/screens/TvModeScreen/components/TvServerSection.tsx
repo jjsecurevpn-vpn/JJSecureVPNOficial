@@ -2,11 +2,13 @@ import React from 'react';
 import { useTranslations } from '../../../../hooks/useTranslations';
 import { ServerView } from '../../ServerSelectorScreen/components/ServerView';
 import { StepSection } from './StepSection';
+import type { Group } from '../../ServerSelectorScreen/types';
+import type { ConfigItem } from '../../../../types/config';
 
 interface TvServerSectionProps {
   loading: boolean;
   loadError: string | null;
-  selectedCategory: any;
+  selectedCategory: Record<string, unknown>;
   compact: boolean;
   headerSize: 'small' | 'medium' | 'large';
   padding: number;
@@ -14,12 +16,12 @@ interface TvServerSectionProps {
   highlightStep2: boolean;
   query: string;
   setQuery: (query: string) => void;
-  groupedItems: any[];
-  activeConfig: any;
+  groupedItems: Group<ConfigItem>[];
+  activeConfig: ConfigItem | null;
   pendingConfigId: string | number | null;
   toggleGroup: (category: string) => void;
   isGroupExpanded: (category: string) => boolean;
-  handleConfigSelect: (config: any) => void;
+  handleConfigSelect: (config: ConfigItem) => void;
 }
 
 export const TvServerSection: React.FC<TvServerSectionProps> = ({

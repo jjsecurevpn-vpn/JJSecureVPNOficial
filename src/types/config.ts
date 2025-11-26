@@ -21,8 +21,8 @@ export interface ConfigItem {
   icon: string;
   type?: string;
   auth?: ConfigAuth;
-  // Permite extensibilidade para campos dinâmicos
-  [key: string]: any;
+  // Permite extensibilidad para campos dinámicos
+  [key: string]: string | number | boolean | ConfigAuth | undefined;
 }
 
 /**

@@ -32,7 +32,7 @@ export const getStatusBarHeight = (): number => {
     ) {
       return window.DtGetStatusBarHeight.execute();
     }
-  } catch (error) {
+  } catch {
     // Error obteniendo altura de la barra de estado
   }
 
@@ -52,7 +52,7 @@ export const getNavigationBarHeight = (): number => {
     ) {
       return window.DtGetNavigationBarHeight.execute();
     }
-  } catch (error) {
+  } catch {
     // Error obteniendo altura de la barra de navegación
   }
 
@@ -72,7 +72,7 @@ export const setNavigationBarColor = (color: string): void => {
     ) {
       window.DtSetNavigationBarColor.execute(color);
     }
-  } catch (error) {
+  } catch {
     // Error configurando color de la barra de navegación
     // Esto es normal en entornos web o cuando la API no está disponible
   }

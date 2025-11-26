@@ -14,4 +14,4 @@ export const fontFamilies = {
  * Mantenemos solo fontFamilies para casos puntuales (fuentes display/mono).
  */
 export const textStyles = {} as const; // Placeholder para evitar imports rotos residuales
-export const applyTextStyle = () => ({} as any); // No-op
+export const applyTextStyle = (): Record<string, unknown> => ({}); // No-op

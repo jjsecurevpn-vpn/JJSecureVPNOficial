@@ -2,28 +2,30 @@ import React from 'react';
 import { TvServerSection } from './TvServerSection';
 import { TvCredentialsSection } from './TvCredentialsSection';
 import { TvConnectionSection } from './TvConnectionSection';
+import type { Group } from '../../ServerSelectorScreen/types';
+import type { ConfigItem } from '../../../../types/config';
 
 interface TvHorizontalLayoutProps {
   spacePx: (value: number) => number;
-  responsiveLayout: any;
+  responsiveLayout: Record<string, unknown>;
   highlightStep1: boolean;
   highlightStep2: boolean;
   loading: boolean;
   loadError: string | null;
-  selectedCategory: any;
+  selectedCategory: Record<string, unknown>;
   contentJustifyClass: string;
   query: string;
   setQuery: (query: string) => void;
-  groupedItems: any[];
-  ssActiveConfig: any;
+  groupedItems: Group<ConfigItem>[];
+  ssActiveConfig: ConfigItem | null;
   pendingConfigId: string | number | null;
   toggleGroup: (category: string) => void;
   isGroupExpanded: (category: string) => boolean;
-  handleConfigSelect: (config: any) => void;
-  activeConfig: any;
+  handleConfigSelect: (config: ConfigItem) => void;
+  activeConfig: ConfigItem | null;
   formError: string | null;
-  vpn: any;
-  handleConnection: () => any;
+  vpn: Record<string, unknown>;
+  handleConnection: () => Record<string, unknown>;
   showServerDescription: boolean;
 }
 
@@ -57,10 +59,10 @@ export const TvHorizontalLayout: React.FC<TvHorizontalLayoutProps> = ({
         loading={loading}
         loadError={loadError}
         selectedCategory={selectedCategory}
-        compact={responsiveLayout.compact}
-        headerSize={responsiveLayout.headerSize}
-        padding={spacePx(responsiveLayout.padding)}
-        fontSize={responsiveLayout.fontSize}
+        compact={Boolean(responsiveLayout.compact)}
+        headerSize={responsiveLayout.headerSize as 'small' | 'medium' | 'large'}
+        padding={spacePx(responsiveLayout.padding as number)}
+        fontSize={responsiveLayout.fontSize as 'small' | 'base' | 'large'}
         highlightStep2={highlightStep2}
         query={query}
         setQuery={setQuery}
@@ -73,20 +75,20 @@ export const TvHorizontalLayout: React.FC<TvHorizontalLayoutProps> = ({
       />
 
       {/* Columna Derecha - Credenciales y Conexión apiladas */}
-      <div className="flex flex-col" style={{ gap: spacePx(responsiveLayout.spacing) }}>
+      <div className="flex flex-col" style={{ gap: spacePx(responsiveLayout.spacing as number) }}>
         <TvCredentialsSection
-          headerSize={responsiveLayout.headerSize}
-          compact={responsiveLayout.compact}
-          padding={spacePx(responsiveLayout.padding)}
+          headerSize={responsiveLayout.headerSize as 'small' | 'medium' | 'large'}
+          compact={Boolean(responsiveLayout.compact)}
+          padding={spacePx(responsiveLayout.padding as number)}
           highlightStep1={highlightStep1}
         />
 
         <TvConnectionSection
-          headerSize={responsiveLayout.headerSize}
-          compact={responsiveLayout.compact}
-          padding={spacePx(responsiveLayout.padding)}
-          spacing={spacePx(responsiveLayout.spacing)}
-          fontSize={responsiveLayout.fontSize}
+          headerSize={responsiveLayout.headerSize as 'small' | 'medium' | 'large'}
+          compact={Boolean(responsiveLayout.compact)}
+          padding={spacePx(responsiveLayout.padding as number)}
+          spacing={spacePx(responsiveLayout.spacing as number)}
+          fontSize={responsiveLayout.fontSize as 'small' | 'base' | 'large'}
           contentJustifyClass={contentJustifyClass}
           activeConfig={activeConfig}
           formError={formError}

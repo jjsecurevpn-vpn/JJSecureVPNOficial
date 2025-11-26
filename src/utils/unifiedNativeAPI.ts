@@ -3,9 +3,12 @@
 import type { VpnState } from "../types/vpn";
 import type { ConfigCategory, ConfigItem } from "../types/config";
 
-function dtCall<T = any, R = T>(name: keyof Window, fallback: R, transform?: (raw: T) => R): R {
+// Tipado seguro para window
+const w = typeof window !== 'undefined' ? (window as unknown as Record<string, unknown>) : {};
+
+function dtCall<T = unknown, R = T>(name: keyof Window, fallback: R, transform?: (raw: T) => R): R {
   try {
-    const fn = (window as any)[name] as { execute?: (...a: any[]) => T } | undefined;
+    const fn = w[name as string] as { execute?: (...a: unknown[]) => T } | undefined;
     if (!fn?.execute) return fallback;
     const raw = fn.execute();
     return transform ? transform(raw) : (raw as unknown as R);
@@ -14,15 +17,15 @@ function dtCall<T = any, R = T>(name: keyof Window, fallback: R, transform?: (ra
   }
 }
 
-const dtExecVoid = (name: keyof Window, ...args: any[]) => {
+const dtExecVoid = (name: keyof Window, ...args: unknown[]) => {
   try {
-    const fn = (window as any)[name];
-    fn?.execute?.(...args);
+    const fn = w[name as string];
+    (fn as { execute?: (...a: unknown[]) => void })?.execute?.(...args);
   } catch { /* noop */ }
 };
 
-const dtGetNum = (name: keyof Window, fallback = 0): number => dtCall(name, fallback, (n: any) => Number(n) || fallback);
-const dtGetStr = (name: keyof Window, fallback = ""): string => dtCall(name, fallback, (s: any) => (typeof s === "string" ? s : fallback));
+const dtGetNum = (name: keyof Window, fallback = 0): number => dtCall(name, fallback, (n: unknown) => Number(n) || fallback);
+const dtGetStr = (name: keyof Window, fallback = ""): string => dtCall(name, fallback, (s: unknown) => (typeof s === "string" ? s : fallback));
 
 
 // --- VPN ---
@@ -32,9 +35,10 @@ const _vpnListeners = new Set<VpnStateListener>();
 let _lastVpnState: VpnState | null = null;
 
 // Registrar listener global nativo una sola vez (idempotente)
-if (!(window as any).__vpnStateHookInstalled) {
-  (window as any).__vpnStateHookInstalled = true;
-  (window as any).DtVpnStateEvent = (state: any) => {
+if (!(window as unknown as Record<string, unknown>).__vpnStateHookInstalled) {
+  const w = window as unknown as Record<string, unknown>;
+  w.__vpnStateHookInstalled = true;
+  w.DtVpnStateEvent = (state: unknown) => {
     if (typeof state === 'string' && _VALID_VPN_STATES.includes(state as VpnState)) {
       _lastVpnState = state as VpnState;
       _vpnListeners.forEach(cb => {
@@ -47,7 +51,7 @@ if (!(window as any).__vpnStateHookInstalled) {
 export const vpnAPI = {
   /** Obtiene el estado actual validado */
   getState(): VpnState | null {
-    return dtCall('DtGetVpnState', null, (state: any) => {
+    return dtCall('DtGetVpnState', null, (state: unknown) => {
       if (typeof state !== 'string') return null;
       return _VALID_VPN_STATES.includes(state as VpnState) ? state as VpnState : null;
     });
@@ -109,15 +113,20 @@ export const vpnAPI = {
 
 // --- Estadísticas de red ---
 export const networkAPI = {
-  getDownloadBytes(): number { return dtCall('DtGetNetworkDownloadBytes', 0, (n: any) => Number(n) || 0); },
-  getUploadBytes(): number { return dtCall('DtGetNetworkUploadBytes', 0, (n: any) => Number(n) || 0); },
+  getDownloadBytes(): number { return dtCall('DtGetNetworkDownloadBytes', 0, (n: unknown) => Number(n) || 0); },
+  getUploadBytes(): number { return dtCall('DtGetNetworkUploadBytes', 0, (n: unknown) => Number(n) || 0); },
   resetSession(): void {
     // Mantener paridad con la API nativa aunque la app no lo use directamente.
   },
-  getLocalIP(): string { return dtCall('DtGetLocalIP', '127.0.0.1', (s:any)=> (typeof s === 'string' && s) ? s : '127.0.0.1'); },
-  getPing(): number { return dtCall('DtGetPingResult', 0, (n:any)=> Number(n) || 0); },
+  getLocalIP(): string { return dtCall('DtGetLocalIP', '127.0.0.1', (s: unknown)=> (typeof s === 'string' && s) ? s : '127.0.0.1'); },
+  getPing(): number { return dtCall('DtGetPingResult', 0, (n: unknown)=> Number(n) || 0); },
   getNetworkInfo(): { type_name:'MOBILE'|'WIFI'; type:number; extra_info:string; detailed_state:string; reason?:string } | null {
-    return dtCall('DtGetNetworkData', null, (raw:any) => raw || null);
+    return dtCall('DtGetNetworkData', null, (raw: unknown) => {
+      if (raw && typeof raw === 'object' && 'type_name' in raw) {
+        return raw as { type_name:'MOBILE'|'WIFI'; type:number; extra_info:string; detailed_state:string; reason?:string };
+      }
+      return null;
+    });
   }
 };
 
@@ -151,10 +160,10 @@ export const configAPI = {
       if (!Array.isArray(parsed)) throw new Error('Invalid config format');
       
       // Ordenar categorías y elementos
-      parsed.sort((a: any, b: any) => (a.sorter || 0) - (b.sorter || 0));
-      parsed.forEach((category: any) => {
-        if (category.items?.length) {
-          category.items.sort((a: any, b: any) => (a.sorter || 0) - (b.sorter || 0));
+      parsed.sort((a: Record<string, unknown>, b: Record<string, unknown>) => ((a.sorter as number) || 0) - ((b.sorter as number) || 0));
+      parsed.forEach((category: Record<string, unknown>) => {
+        if (Array.isArray(category.items) && category.items.length) {
+          (category.items as Record<string, unknown>[]).sort((a: Record<string, unknown>, b: Record<string, unknown>) => ((a.sorter as number) || 0) - ((b.sorter as number) || 0));
         }
       });
       
@@ -169,11 +178,13 @@ export const configAPI = {
     try {
       const raw = window.DtGetDefaultConfig?.execute();
       if (!raw) return null;
-      let parsed: any;
+      let parsed: Record<string, unknown> | null = null;
       try { parsed = JSON.parse(raw); } catch { return null; }
+      
+      if (!parsed) return null;
 
       // Si falta 'auth' u otros campos, intentamos enriquecer desde el listado global.
-      const needsEnrich = !parsed || typeof parsed !== 'object' || !parsed.auth;
+      const needsEnrich = typeof parsed !== 'object' || !parsed.auth;
       if (needsEnrich) {
         try {
           const allRaw = window.DtGetConfigs?.execute();
@@ -182,10 +193,10 @@ export const configAPI = {
             if (Array.isArray(all)) {
               for (const cat of all) {
                 if (cat?.items && Array.isArray(cat.items)) {
-                  const found = cat.items.find((it: any) => it && it.id === parsed.id);
+                  const found = cat.items.find((it: Record<string, unknown>) => it && (it.id as string) === (parsed as Record<string, unknown>).id);
                   if (found) {
                     // Fusionar sin sobrescribir campos ya presentes
-                    parsed = { ...found, ...parsed, auth: found.auth || parsed.auth };
+                    parsed = { ...found, ...parsed, auth: (found.auth as unknown) || parsed.auth };
                     break;
                   }
                 }
@@ -294,8 +305,8 @@ export const uiAPI = {
   openConfigDialog(): void { dtExecVoid('DtExecuteDialogConfig'); },
   openLogDialog(): void { dtExecVoid('DtShowLoggerDialog'); },
   openMenuDialog(): void { dtExecVoid('DtShowMenuDialog'); },
-  openWebView(url: string): void { try { (window as any).DtStartWebViewActivity?.execute(url); } catch { window.open(url,'_blank'); } },
-  openExternalUrl(url: string): void { try { (window as any).DtOpenExternalUrl?.execute(url); } catch { window.open(url,'_blank'); } }
+  openWebView(url: string): void { try { (w.DtStartWebViewActivity as { execute?: (url: string) => void })?.execute?.(url); } catch { (window as unknown as Record<string, (url: string, target: string) => void>).open?.(url,'_blank'); } },
+  openExternalUrl(url: string): void { try { (w.DtOpenExternalUrl as { execute?: (url: string) => void })?.execute?.(url); } catch { (window as unknown as Record<string, (url: string, target: string) => void>).open?.(url,'_blank'); } }
 };
 
 // --- Logs ---
@@ -306,7 +317,7 @@ export const logsAPI = {
 
 // --- Traducción ---
 export const i18nAPI = {
-  translate(key: string): string { return dtCall('DtTranslateText', key, (s:any)=> typeof s === 'string' ? s : key); }
+  translate(key: string): string { return dtCall('DtTranslateText', key, (s: unknown)=> typeof s === 'string' ? s : key); }
 };
 
 
@@ -317,18 +328,18 @@ export const systemAPI = {
 };
 
 // --- Eventos nativos ---
-export type DtunnelEventHandler<T = any> = (payload: T) => void;
+export type DtunnelEventHandler<T = unknown> = (payload: T) => void;
 
 export const eventsAPI = {
-  on<T = any>(eventName: string, handler: DtunnelEventHandler<T>): void {
-    (window as any)[eventName] = handler;
+  on<T = unknown>(eventName: string, handler: DtunnelEventHandler<T>): void {
+    (window as unknown as Record<string, unknown>)[eventName] = handler;
   },
 
   off(eventName: string): void {
-    delete (window as any)[eventName];
+    delete (window as unknown as Record<string, unknown>)[eventName];
   },
 
-  register(listeners: Record<string, DtunnelEventHandler>): void {
+  register(listeners: Record<string, DtunnelEventHandler<unknown>>): void {
     Object.entries(listeners).forEach(([event, handler]) => {
       this.on(event, handler);
     });

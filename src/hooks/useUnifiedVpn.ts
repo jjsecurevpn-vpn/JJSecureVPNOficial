@@ -39,7 +39,7 @@ export function useUnifiedVpn(opts: UseUnifiedVpnOptions = {}) {
   const { pollMs = 2000 } = opts; // Polling unificado más simple
   const [vpn, setVpn] = useState<UnifiedVpnState>(INITIAL);
   const mountedRef = useRef(true);
-  const pollRef = useRef<any>(null);
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   const applyState = useCallback((s: VpnState) => {
     setVpn(prev => {

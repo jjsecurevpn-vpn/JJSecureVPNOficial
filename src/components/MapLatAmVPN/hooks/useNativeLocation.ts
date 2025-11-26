@@ -34,11 +34,11 @@ export const useNativeLocation = ({
 
       // Obtener datos detallados de red
       if (window.DtGetNetworkData) {
-        const networkData = window.DtGetNetworkData.execute();
+        const networkData = (window.DtGetNetworkData.execute() as unknown) as Record<string, unknown> | null;
         if (typeof networkData === 'object' && networkData !== null) {
-          data.networkType = (networkData as any).type_name;
-          data.hasConnection = (networkData as any).detailed_state === 'CONNECTED';
-          data.networkName = (networkData as any).name || undefined;
+          data.networkType = ((networkData as Record<string, unknown>)['type_name'] as unknown as 'MOBILE' | 'WIFI' | undefined) || undefined;
+          data.hasConnection = ((networkData as Record<string, unknown>)['detailed_state'] as unknown as string | undefined) === 'CONNECTED';
+          data.networkName = ((networkData as Record<string, unknown>)['name'] as unknown as string | undefined) || undefined;
         }
       }
 

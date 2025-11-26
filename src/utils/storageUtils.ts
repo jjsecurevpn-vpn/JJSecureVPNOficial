@@ -9,7 +9,7 @@ export function getStorageItem<T>(key: string): T | null {
   }
 }
 
-export function setStorageItem(key: string, value: any): void {
+export function setStorageItem(key: string, value: unknown): void {
   localStorage.setItem(`${STORAGE_PREFIX}${key}`, JSON.stringify(value));
 }
 

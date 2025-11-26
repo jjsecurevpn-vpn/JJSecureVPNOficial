@@ -11,7 +11,7 @@ export type GroupMeta = {
   order: number; 
 };
 
-export type Group<T = any> = GroupMeta & { items: T[] };
+export type Group<T = Record<string, unknown>> = GroupMeta & { items: T[] };
 
 export type SubcategorySpec = {
   key: string;
@@ -22,41 +22,44 @@ export type SubcategorySpec = {
 };
 
 // Función para obtener traducciones de subcategorías
-export const getSubcategoryTranslations = (t?: any) => {
+export const getSubcategoryTranslations = (t?: Record<string, unknown>) => {
+  const translations = t?.serverSelectorScreen as Record<string, unknown> | undefined;
+  const subcategories = translations?.subcategories as Record<string, Record<string, string | undefined>> | undefined;
+  
   return {
     "premium-ssh": {
-      title: t?.serverSelectorScreen?.subcategories?.premiumSsh?.title || "🏆 PRINCIPAL",
-      description: t?.serverSelectorScreen?.subcategories?.premiumSsh?.description || "Configuración recomendada • Internet ilimitado",
+      title: (subcategories?.premiumSsh?.title as string | undefined) || "🏆 PRINCIPAL",
+      description: (subcategories?.premiumSsh?.description as string | undefined) || "Configuración recomendada • Internet ilimitado",
     },
     "premium-cm": {
-      title: t?.serverSelectorScreen?.subcategories?.premiumCm?.title || "CONGELA MEGAS",
-      description: t?.serverSelectorScreen?.subcategories?.premiumCm?.description || "Usar con precaución",
+      title: (subcategories?.premiumCm?.title as string | undefined) || "CONGELA MEGAS",
+      description: (subcategories?.premiumCm?.description as string | undefined) || "Usar con precaución",
     },
     "udp-hysteria": {
-      title: t?.serverSelectorScreen?.subcategories?.udpHysteria?.title || "UDP HYSTERIA",
-      description: t?.serverSelectorScreen?.subcategories?.udpHysteria?.description || "Protocolo UDP optimizado",
+      title: (subcategories?.udpHysteria?.title as string | undefined) || "UDP HYSTERIA",
+      description: (subcategories?.udpHysteria?.description as string | undefined) || "Protocolo UDP optimizado",
     },
     "premium-vpn": {
-      title: t?.serverSelectorScreen?.subcategories?.premiumVpn?.title || "PREMIUM VPN",
-      description: t?.serverSelectorScreen?.subcategories?.premiumVpn?.description || "Camuflaje de IP con datos",
+      title: (subcategories?.premiumVpn?.title as string | undefined) || "PREMIUM VPN",
+      description: (subcategories?.premiumVpn?.description as string | undefined) || "Camuflaje de IP con datos",
     },
     "premium-dns": {
-      title: t?.serverSelectorScreen?.subcategories?.premiumDns?.title || "PREMIUM DNS",
-      description: t?.serverSelectorScreen?.subcategories?.premiumDns?.description || "Sin Anuncios",
+      title: (subcategories?.premiumDns?.title as string | undefined) || "PREMIUM DNS",
+      description: (subcategories?.premiumDns?.description as string | undefined) || "Sin Anuncios",
     },
     "premium-games": {
-      title: t?.serverSelectorScreen?.subcategories?.premiumGames?.title || "PREMIUM GAMES",
-      description: t?.serverSelectorScreen?.subcategories?.premiumGames?.description || "Soporte para Juegos",
+      title: (subcategories?.premiumGames?.title as string | undefined) || "PREMIUM GAMES",
+      description: (subcategories?.premiumGames?.description as string | undefined) || "Soporte para Juegos",
     },
     "otros": {
-      title: t?.serverSelectorScreen?.subcategories?.others?.title || "Otros",
+      title: (subcategories?.others?.title as string | undefined) || "Otros",
       description: undefined,
     }
   };
 };
 
 // Especificaciones de subcategorías PREMIUM (con traducciones por defecto)
-export const getSubcategorySpecs = (t?: any): SubcategorySpec[] => {
+export const getSubcategorySpecs = (t?: Record<string, unknown>): SubcategorySpec[] => {
   const translations = getSubcategoryTranslations(t);
   
   return [
@@ -116,7 +119,7 @@ export const SUBCATEGORY_SPECS: SubcategorySpec[] = getSubcategorySpecs();
 export const classifyItem = <T extends { name?: string; description?: string }>(
   item: T,
   specs?: SubcategorySpec[],
-  t?: any
+  t?: Record<string, unknown>
 ): GroupMeta => {
   const translations = getSubcategoryTranslations(t);
   const useSpecs = specs || getSubcategorySpecs(t);
@@ -145,7 +148,7 @@ export const classifyItem = <T extends { name?: string; description?: string }>(
 export const groupItemsByCategory = <T extends { name?: string; description?: string }>(
   items: T[],
   specs?: SubcategorySpec[],
-  t?: any
+  t?: Record<string, unknown>
 ): Group<T>[] => {
   const useSpecs = specs || getSubcategorySpecs(t);
   const map = new Map<string, Group<T>>();

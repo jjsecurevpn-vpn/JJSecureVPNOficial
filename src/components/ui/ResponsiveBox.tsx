@@ -135,7 +135,7 @@ export interface ResponsiveBoxProps extends Omit<React.HTMLAttributes<HTMLDivEle
   children?: React.ReactNode;
 }
 
-export const ResponsiveBox = forwardRef<HTMLElement, ResponsiveBoxProps>(({
+export const ResponsiveBox = forwardRef<unknown, ResponsiveBoxProps>(({
   scaleType = 'component',
   as: Component = 'div',
   width,
@@ -309,6 +309,7 @@ export const ResponsiveBox = forwardRef<HTMLElement, ResponsiveBoxProps>(({
   const ElementComponent = Component as React.ElementType;
   
   return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <ElementComponent
       ref={ref as any}
       style={finalStyle}
@@ -322,15 +323,15 @@ export const ResponsiveBox = forwardRef<HTMLElement, ResponsiveBoxProps>(({
 ResponsiveBox.displayName = 'ResponsiveBox';
 
 // Componentes especializados basados en ResponsiveBox
-export const Flex = forwardRef<HTMLElement, ResponsiveBoxProps>((props, ref) => (
+export const Flex = forwardRef<unknown, ResponsiveBoxProps>((props, ref) => (
   <ResponsiveBox ref={ref} display="flex" {...props} />
 ));
 
-export const Grid = forwardRef<HTMLElement, ResponsiveBoxProps>((props, ref) => (
+export const Grid = forwardRef<unknown, ResponsiveBoxProps>((props, ref) => (
   <ResponsiveBox ref={ref} display="grid" {...props} />
 ));
 
-export const Container = forwardRef<HTMLElement, ResponsiveBoxProps>((props, ref) => (
+export const Container = forwardRef<unknown, ResponsiveBoxProps>((props, ref) => (
   <ResponsiveBox 
     ref={ref} 
     maxWidth={{ xs: '100%', sm: '100%', md: '100%', lg: '1200px', xl: '1400px' }}
@@ -340,7 +341,7 @@ export const Container = forwardRef<HTMLElement, ResponsiveBoxProps>((props, ref
   />
 ));
 
-export const Stack = forwardRef<HTMLElement, ResponsiveBoxProps & { spacing?: ResponsiveValue<string | number> }>(({ 
+export const Stack = forwardRef<unknown, ResponsiveBoxProps & { spacing?: ResponsiveValue<string | number> }>(({ 
   spacing: stackSpacing = 16, 
   ...props 
 }, ref) => (
@@ -353,7 +354,7 @@ export const Stack = forwardRef<HTMLElement, ResponsiveBoxProps & { spacing?: Re
   />
 ));
 
-export const HStack = forwardRef<HTMLElement, ResponsiveBoxProps & { spacing?: ResponsiveValue<string | number> }>(({ 
+export const HStack = forwardRef<unknown, ResponsiveBoxProps & { spacing?: ResponsiveValue<string | number> }>(({ 
   spacing: stackSpacing = 16, 
   ...props 
 }, ref) => (

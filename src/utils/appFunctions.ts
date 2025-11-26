@@ -23,7 +23,8 @@ export function getNetworkType(): string {
     }
 
     // Fallback: Navigator API
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    const nav = navigator as unknown as Record<string, unknown>;
+    const connection = (nav.connection || nav.mozConnection || nav.webkitConnection) as { type?: string } | undefined;
     if (connection) {
       if (connection.type === 'wifi') return 'WiFi';
       if (connection.type === 'cellular') return 'Móvil';
@@ -81,9 +82,10 @@ export function getNetworkStatus(): string {
  */
 export function checkBatteryOptimization(): boolean {
   try {
-    if (window?.DtIgnoreBatteryOptimizations?.execute && 
-      typeof window.DtIgnoreBatteryOptimizations.execute === "function") {
-      return window.DtIgnoreBatteryOptimizations.execute();
+    const w = window as unknown as Record<string, unknown>;
+    const dtIgnore = w.DtIgnoreBatteryOptimizations as { execute?: () => boolean } | undefined;
+    if (dtIgnore?.execute && typeof dtIgnore.execute === "function") {
+      return dtIgnore.execute();
     }
     return false;
   } catch {
@@ -97,8 +99,10 @@ export function checkBatteryOptimization(): boolean {
  */
 export function openApnSettings(): void {
   try {
-    if (typeof window !== 'undefined' && (window as any).DtOpenApnSettings) {
-      (window as any).DtOpenApnSettings.execute();
+    if (typeof window !== 'undefined') {
+      const w = window as unknown as Record<string, unknown>;
+      const dtOpenApn = w.DtOpenApnSettings as { execute?: () => void } | undefined;
+      dtOpenApn?.execute?.();
     }
   } catch (error) {
     console.warn('Error abriendo configuración APN:', error);
@@ -111,8 +115,10 @@ export function openApnSettings(): void {
  */
 export function openNetworkSettings(): void {
   try {
-    if (typeof window !== 'undefined' && (window as any).DtOpenNetworkSettings) {
-      (window as any).DtOpenNetworkSettings.execute();
+    if (typeof window !== 'undefined') {
+      const w = window as unknown as Record<string, unknown>;
+      const dtOpenNet = w.DtOpenNetworkSettings as { execute?: () => void } | undefined;
+      dtOpenNet?.execute?.();
     }
   } catch (error) {
     console.warn('Error abriendo configuración de red:', error);
@@ -125,8 +131,10 @@ export function openNetworkSettings(): void {
  */
 export function checkForUpdates(): void {
   try {
-    if (typeof window !== 'undefined' && (window as any).DtCheckForUpdates) {
-      (window as any).DtCheckForUpdates.execute();
+    if (typeof window !== 'undefined') {
+      const w = window as unknown as Record<string, unknown>;
+      const dtCheck = w.DtCheckForUpdates as { execute?: () => void } | undefined;
+      dtCheck?.execute?.();
     }
   } catch (error) {
     console.warn('Error verificando actualizaciones:', error);
@@ -143,13 +151,15 @@ export function setAndroidBackButtonListener(callback: () => void): boolean {
   try {
     if (typeof window === 'undefined') return false;
 
+    const w = window as unknown as Record<string, unknown>;
+
     // Configurar listener nativo
-    if ((window as any).DtSetBackButtonListener) {
-      (window as any).DtSetBackButtonListener.execute();
+    if (w.DtSetBackButtonListener) {
+      (w.DtSetBackButtonListener as { execute?: () => void }).execute?.();
     }
 
     // Configurar callback
-    (window as any).onAndroidBackPressed = () => {
+    w.onAndroidBackPressed = () => {
       try {
         callback();
         return true;
@@ -178,7 +188,7 @@ export function setAndroidBackButtonListener(callback: () => void): boolean {
     window.addEventListener('popstate', handlePopState);
 
     // Guardar referencias para cleanup
-    (window as any)._backButtonHandlers = {
+    w._backButtonHandlers = {
       keydown: handleKeyDown,
       popstate: handlePopState
     };
@@ -198,16 +208,18 @@ export function removeAndroidBackButtonListener(): boolean {
   try {
     if (typeof window === 'undefined') return false;
 
+    const w = window as unknown as Record<string, unknown>;
+
     // Remover callback nativo
-    (window as any).onAndroidBackPressed = null;
+    w.onAndroidBackPressed = null;
 
     // Remover listener nativo
-    if ((window as any).DtRemoveBackButtonListener) {
-      (window as any).DtRemoveBackButtonListener.execute();
+    if (w.DtRemoveBackButtonListener) {
+      (w.DtRemoveBackButtonListener as { execute?: () => void }).execute?.();
     }
 
     // Remover listeners DOM
-    const handlers = (window as any)._backButtonHandlers;
+    const handlers = w._backButtonHandlers as Record<string, EventListener> | undefined;
     if (handlers) {
       if (handlers.keydown) {
         document.removeEventListener('keydown', handlers.keydown);
@@ -215,7 +227,7 @@ export function removeAndroidBackButtonListener(): boolean {
       if (handlers.popstate) {
         window.removeEventListener('popstate', handlers.popstate);
       }
-      delete (window as any)._backButtonHandlers;
+      delete w._backButtonHandlers;
     }
 
     return true;
@@ -289,8 +301,12 @@ export function getSubidaBytes(): number {
  */
 export function cleanAppData(): boolean {
   try {
-    if (typeof window !== 'undefined' && (window as any).DtCleanApp?.execute) {
-      return (window as any).DtCleanApp.execute();
+    if (typeof window === 'undefined') return false;
+    
+    const w = window as unknown as Record<string, unknown>;
+    const dtClean = w.DtCleanApp as { execute?: () => boolean } | undefined;
+    if (dtClean?.execute) {
+      return dtClean.execute();
     }
     return false;
   } catch (error) {

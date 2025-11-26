@@ -56,7 +56,7 @@ export const LanguageSelectorBadge: React.FC = () => {
                 <li key={lang.code}>
                   <button
                     onClick={() => {
-                      setLanguage(lang.code as any);
+                      setLanguage(lang.code);
                       setOpen(false);
                     }}
                     className={`w-full text-left px-3 py-2 rounded-lg text-[13px] tracking-wide flex items-center justify-between transition-colors ${lang.code === currentLanguage ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-400/30' : 'text-white/75 hover:text-white hover:bg-white/5 border border-transparent'}`}

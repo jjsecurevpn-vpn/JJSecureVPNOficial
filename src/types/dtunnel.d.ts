@@ -1,8 +1,8 @@
 // Declaraciones globales DTunnel: expone las interfaces mínimas para evitar errores TS.
 // Mantener este archivo sincronizado con las funciones efectivamente usadas en unifiedNativeAPI.
 
-export interface DtExecutable<T = any> {
-  execute: (...args: any[]) => T;
+export interface DtExecutable<T = unknown> {
+  execute: (...args: unknown[]) => T;
 }
 export interface DtKV<T = string> {
   get: () => T | undefined;

@@ -17,18 +17,19 @@ export function useRecentConfigs(max = 5) {
   const [recent, setRecent] = useState<RecentConfigItem[]>([]);
 
   useEffect(() => {
-    const handler = (payload: any) => {
+    const handler = (payload: unknown) => {
       try {
+        const p = payload as Record<string, unknown> | null;
         const item: RecentConfigItem = {
-          id: payload?.id,
-          name: payload?.name,
-          mode: payload?.mode,
-          description: payload?.description,
-          icon: payload?.icon,
+          id: p?.id as number | undefined,
+          name: p?.name as string | undefined,
+          mode: p?.mode as string | undefined,
+          description: p?.description as string | undefined,
+          icon: p?.icon as string | undefined,
           timestamp: Date.now(),
         };
         setRecent(prev => {
-          const existing = prev.filter(p => p.id !== item.id);
+          const existing = prev.filter(prev => prev.id !== item.id);
           const next = [item, ...existing].slice(0, max);
             return next;
         });
@@ -36,10 +37,11 @@ export function useRecentConfigs(max = 5) {
         // ignore
       }
     };
-    (window as any).DtConfigSelectedEvent = handler;
+    const w = window as unknown as Record<string, unknown>;
+    w.DtConfigSelectedEvent = handler;
     return () => {
-      if ((window as any).DtConfigSelectedEvent === handler) {
-        (window as any).DtConfigSelectedEvent = undefined;
+      if ((window as unknown as Record<string, unknown>).DtConfigSelectedEvent === handler) {
+        (window as unknown as Record<string, unknown>).DtConfigSelectedEvent = undefined;
       }
     };
   }, [max]);

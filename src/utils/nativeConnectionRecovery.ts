@@ -170,12 +170,13 @@ class NativeConnectionRecovery {
       'DtGetPingResult'
     ];
 
+    const w = window as unknown as Record<string, unknown>;
     nativeAPIs.forEach(apiName => {
-      const api = (window as any)[apiName];
+      const api = w[apiName] as { execute: (...args: unknown[]) => unknown } | undefined;
       if (api && api.execute) {
         const originalExecute = api.execute;
         
-        api.execute = (...args: any[]) => {
+        api.execute = (...args: unknown[]) => {
           try {
             const result = originalExecute.apply(api, args);
             return result;
@@ -208,7 +209,7 @@ class NativeConnectionRecovery {
   /**
    * Obtener valor por defecto para APIs que fallan
    */
-  private getDefaultValueForAPI(apiName: string): any {
+  private getDefaultValueForAPI(apiName: string): string | number | null {
     switch (apiName) {
       case 'DtGetVpnState':
         return 'UNKNOWN';

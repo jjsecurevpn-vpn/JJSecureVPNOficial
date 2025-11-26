@@ -46,12 +46,13 @@ export function useSessionStats(pollInterval = 5000) {
   useEffect(() => {
   const readStats = () => {
       try {
-        const ping = (window as any).DtGetPingResult?.execute?.() ?? null;
-        const localIP = (window as any).DtGetLocalIP?.execute?.() ?? null;
-        const networkName = (window as any).DtGetNetworkName?.execute?.() ?? null;
+        const w = window as unknown as Record<string, unknown>;
+        const ping = (w.DtGetPingResult as { execute?: () => unknown } | undefined)?.execute?.() ?? null;
+        const localIP = (w.DtGetLocalIP as { execute?: () => unknown } | undefined)?.execute?.() ?? null;
+        const networkName = (w.DtGetNetworkName as { execute?: () => unknown } | undefined)?.execute?.() ?? null;
         // Bytes pueden provenir de APIs de hotspot; si no están disponibles se ignoran
-        const downloadBytes = (window as any).DtGetNetworkDownloadBytes?.execute?.() ?? null;
-        const uploadBytes = (window as any).DtGetNetworkUploadBytes?.execute?.() ?? null;
+        const downloadBytes = (w.DtGetNetworkDownloadBytes as { execute?: () => unknown } | undefined)?.execute?.() ?? null;
+        const uploadBytes = (w.DtGetNetworkUploadBytes as { execute?: () => unknown } | undefined)?.execute?.() ?? null;
         setStats(prev => {
           let downloadRate: number | null = null;
           let uploadRate: number | null = null;

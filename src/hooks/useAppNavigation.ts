@@ -1,24 +1,24 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Dispatch, SetStateAction } from "react";
 import {
   setAndroidBackButtonListener,
   removeAndroidBackButtonListener,
 } from "../utils";
 
 export interface NavigationState {
-  currentModal: any;
+  currentModal: unknown;
   showWelcomeScreen: boolean;
   activeTab: string;
 }
 
-export interface NavigationActions {
-  setCurrentModal: (modal: any) => void;
+export interface NavigationActions<TModal = string | null> {
+  setCurrentModal: Dispatch<SetStateAction<TModal>>;
   setShowWelcomeScreen: (show: boolean) => void;
   handleFooterNavigation: (tab: string) => void;
 }
 
-export function useAppNavigation(
+export function useAppNavigation<TModal = string | null>(
   navigationState: NavigationState,
-  navigationActions: NavigationActions
+  navigationActions: NavigationActions<TModal>
 ) {
   const stateRef = useRef(navigationState);
   const actionsRef = useRef(navigationActions);
@@ -32,9 +32,10 @@ export function useAppNavigation(
 
   useEffect(() => {
     // Señal global para evitar que hooks de componentes registren nativo de nuevo
-    (window as any).__GLOBAL_APP_BACK = true;
-    if (!(window as any).__BACK_STACK) {
-      (window as any).__BACK_STACK = [] as Array<() => void>;
+    const w = window as unknown as Record<string, unknown>;
+    w.__GLOBAL_APP_BACK = true;
+    if (!w.__BACK_STACK) {
+      w.__BACK_STACK = [] as unknown[];
     }
 
     const beginHandle = () => {
@@ -49,7 +50,9 @@ export function useAppNavigation(
     const ensureHistoryTrap = () => {
       try {
         window.history.pushState({ trap: "back" }, "", window.location.href);
-      } catch {}
+      } catch {
+        // Error al pushState (puede ocurrir en algunos entornos)
+      }
     };
 
     const handleBackPress = () => {
@@ -68,7 +71,7 @@ export function useAppNavigation(
 
       // 1) Modales
       if (currentModal) {
-        setCurrentModal(null);
+        setCurrentModal(null as unknown as TModal);
         ensureHistoryTrap();
         return true;
       }
@@ -87,26 +90,29 @@ export function useAppNavigation(
       }
 
       // 4) Si estamos en HOME, permitir handlers específicos (p.e. cerrar sheets ligeros)
-      const stack: any[] = (window as any).__BACK_STACK || [];
+      const stack = w.__BACK_STACK as Array<{ intercept?: () => boolean; fn?: () => void } | (() => void)> || [];
       if (stack.length > 0) {
-        const top: any = stack[stack.length - 1];
+        const top = stack[stack.length - 1];
         try {
           if (typeof top === 'function') {
             top();
           } else if (top && typeof top === 'object') {
-            if (typeof top.intercept === 'function' && top.intercept()) {
+            const handler = top as { intercept?: () => boolean; fn?: () => void };
+            if (typeof handler.intercept === 'function' && handler.intercept()) {
               // Interceptado sin cerrar
-            } else if (typeof top.fn === 'function') {
-              top.fn();
+            } else if (typeof handler.fn === 'function') {
+              handler.fn();
             }
           }
-        } catch {}
+        } catch {
+          // Error en handler, continuar
+        }
         ensureHistoryTrap();
         return true;
       }
 
       // 5) HOME sin handlers -> Confirmar salida
-      setCurrentModal("exitconfirm");
+      setCurrentModal("exitconfirm" as unknown as TModal);
       ensureHistoryTrap();
       return true;
     };
@@ -125,20 +131,20 @@ export function useAppNavigation(
       }
     };
 
-    const nativeSuccess = setAndroidBackButtonListener(handleBackPress as any);
-    (window as any).__NATIVE_BACK_ACTIVE = !!nativeSuccess;
+    const nativeSuccess = setAndroidBackButtonListener(handleBackPress);
+    w.__NATIVE_BACK_ACTIVE = !!nativeSuccess;
 
     ensureHistoryTrap();
     window.addEventListener("popstate", handleWebBackButton);
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      if ((window as any).__NATIVE_BACK_ACTIVE) {
+      if (w.__NATIVE_BACK_ACTIVE) {
         removeAndroidBackButtonListener();
       }
       window.removeEventListener("popstate", handleWebBackButton);
       window.removeEventListener("keydown", handleKeyDown);
-      (window as any).__GLOBAL_APP_BACK = false;
+      w.__GLOBAL_APP_BACK = false;
     };
   }, []);
 

@@ -71,10 +71,10 @@ export function useResponsiveSpacing() {
 }
 
 export function useResponsiveValue<T>(values: Partial<Record<import('../responsive/unifiedResponsive').BreakpointKey, T>> | T, fallback?: T): T {
-  return useUnifiedResponsiveValue(values as any, fallback);
+  return useUnifiedResponsiveValue(values as unknown as Partial<Record<string, T>> | T, fallback);
 }
 
-export function useResponsiveStyles<T extends Record<string, any>>(baseStyles: T, scaleType: ScaleType = 'component'): T {
+export function useResponsiveStyles<T extends Record<string, unknown>>(baseStyles: T, scaleType: ScaleType = 'component'): T {
   const { scaleStyles, bp } = useResponsiveUI();
   return useMemo(() => scaleStyles(baseStyles, scaleType), [baseStyles, scaleType, bp, scaleStyles]);
 }

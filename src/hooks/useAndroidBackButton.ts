@@ -47,8 +47,9 @@ export function useAndroidBackButton({
   useEffect(() => {
     if (!isActive) return;
 
-    const w = window as any;
-  const stack: Array<{ fn: () => void; priority: number; intercept?: () => boolean; ignoreIfBottomSheet?: boolean; id: number }> = (w.__BACK_STACK ||= []);
+    const w = window as unknown as Record<string, unknown>;
+  const stack: Array<{ fn: () => void; priority: number; intercept?: () => boolean; ignoreIfBottomSheet?: boolean; id: number }> = (w.__BACK_STACK as typeof stack) || [];
+  w.__BACK_STACK = stack;
     const id = Date.now() + Math.random();
 
     const entry = {
@@ -76,7 +77,9 @@ export function useAndroidBackButton({
             if (item.intercept && item.intercept()) return; // intercepta sin cerrar
             item.fn();
             return;
-          } catch {}
+          } catch {
+            // Error en handler, continuar a siguiente
+          }
         }
       };
       w.__BACK_DISPATCHER__ = dispatcher;
@@ -96,8 +99,9 @@ export function useAndroidBackButton({
 
 // Helper para registrar manualmente (p.e. en sistemas sin hook React)
 export function registerAndroidBackHandler(fn: () => void, priority = 0) {
-  const w = window as any;
-  const stack: Array<{ fn: () => void; priority: number; id: number }> = (w.__BACK_STACK ||= []);
+  const w = window as unknown as Record<string, unknown>;
+  const stack: Array<{ fn: () => void; priority: number; id: number }> = (w.__BACK_STACK as typeof stack) || [];
+  w.__BACK_STACK = stack;
   const id = Date.now() + Math.random();
   stack.push({ fn, priority, id });
   stack.sort((a,b) => b.priority - a.priority || b.id - a.id);

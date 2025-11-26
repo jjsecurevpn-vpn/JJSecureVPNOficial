@@ -34,7 +34,7 @@ function safeGetLocalIP(): string {
   }
 }
 
-function tryExecute(fn: any): string | null {
+function tryExecute(fn: { execute?: () => string | null } | undefined): string | null {
   try {
     const v = fn?.execute?.();
     if (!v || typeof v !== "string") return null;
@@ -48,12 +48,14 @@ function tryExecute(fn: any): string | null {
 // Estrategia jerárquica para obtener VPN IP (la primera válida) -----------
 function resolveVpnIP(): { ip: string | null; source: string | null } {
   // Simulación (modo desarrollo) ------------------------------------------
-  const simulated = (window as any).__vpnIPSimulation;
+  const w = window as unknown as Record<string, unknown>;
+  const simulated = w.__vpnIPSimulation as string | undefined;
   if (simulated) return { ip: simulated, source: "simulation" };
 
   // 1. API unificada si existiese (nativeAPI.network.getVpnIP) ------------
   try {
-    const direct = (nativeAPI as any).network?.getVpnIP?.();
+    const nativeAny = nativeAPI as unknown as { network?: { getVpnIP?: () => string | null } };
+    const direct = nativeAny.network?.getVpnIP?.();
     if (direct && typeof direct === "string" && direct !== "0.0.0.0") {
       return { ip: direct, source: "nativeAPI.network.getVpnIP" };
     }
@@ -61,10 +63,10 @@ function resolveVpnIP(): { ip: string | null; source: string | null } {
 
   // 2. Funciones nativas específicas (orden de prioridad) -----------------
   const candidates: Array<[string, string | null]> = [
-    ["DtGetVpnIP", tryExecute((window as any).DtGetVpnIP)],
-    ["DtGetHysteriaIP", tryExecute((window as any).DtGetHysteriaIP)],
-    ["DtGetExternalIP", tryExecute((window as any).DtGetExternalIP)],
-    ["DtGetHysteriaTunnelIP", tryExecute((window as any).DtGetHysteriaTunnelIP)],
+    ["DtGetVpnIP", tryExecute((w.DtGetVpnIP as { execute?: () => string | null } | undefined))],
+    ["DtGetHysteriaIP", tryExecute((w.DtGetHysteriaIP as { execute?: () => string | null } | undefined))],
+    ["DtGetExternalIP", tryExecute((w.DtGetExternalIP as { execute?: () => string | null } | undefined))],
+    ["DtGetHysteriaTunnelIP", tryExecute((w.DtGetHysteriaTunnelIP as { execute?: () => string | null } | undefined))],
   ];
 
   for (const [name, val] of candidates) {

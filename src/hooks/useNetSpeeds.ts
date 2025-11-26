@@ -146,7 +146,7 @@ export function useNetSpeeds(opts: UseNetSpeedsOptions = {}): NetSpeedsResult {
           isSimulated: false,
           formatted: { download: formatSpeed(dKBps * 1024), upload: formatSpeed(uKBps * 1024) }
         });
-      } catch (e) {
+      } catch {
         setState((prev) => ({
           downloadKBps: 0,
           uploadKBps: 0,

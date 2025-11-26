@@ -68,7 +68,7 @@ export const ActiveConfigProvider = ({ children }: { children: ReactNode }) => {
     };
 
     // Handler que aprovecha payload directo del evento nativo si viene incluido
-    const handleConfigSelected = (payload?: any) => {
+    const handleConfigSelected = (payload?: unknown) => {
       try {
         if (payload && typeof payload === 'object') {
           // Actualizar directamente con el objeto recibido (retiene campos auth completos)
@@ -83,8 +83,9 @@ export const ActiveConfigProvider = ({ children }: { children: ReactNode }) => {
     };
 
     if (typeof window !== 'undefined') {
-      (window as any).DtNewDefaultConfigEvent = softRefresh;
-      (window as any).DtConfigSelectedEvent = handleConfigSelected;
+      const w = window as unknown as Record<string, unknown>;
+      w.DtNewDefaultConfigEvent = softRefresh;
+      w.DtConfigSelectedEvent = handleConfigSelected;
 
       // También escuchar eventos de focus/visibilidad
       window.addEventListener('focus', softRefresh);
@@ -94,8 +95,9 @@ export const ActiveConfigProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       if (typeof window !== 'undefined') {
-        delete (window as any).DtNewDefaultConfigEvent;
-        delete (window as any).DtConfigSelectedEvent;
+        const w = window as unknown as Record<string, unknown>;
+        delete w.DtNewDefaultConfigEvent;
+        delete w.DtConfigSelectedEvent;
         window.removeEventListener('focus', softRefresh);
         document.removeEventListener('visibilitychange', () => {});
       }

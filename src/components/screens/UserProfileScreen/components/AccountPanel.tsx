@@ -8,6 +8,7 @@ import { AlertTriangle, RefreshCw, Users, Clock, Lock } from "lucide-react";
 // Botón de soporte removido: ahora existe un único botón global en la pantalla
 import { useTranslations, useLanguage } from "../../../../context/LanguageContext";
 import type { UserData } from "../types";
+import type { Translations } from "../../../../translations/types";
 
 interface AccountPanelProps {
   data: UserData;
@@ -25,7 +26,7 @@ const formatDate = (dateString: string, language: string = 'es'): string => {
   }
 };
 
-const getStatusInfo = (days: number, t: any) => {
+const getStatusInfo = (days: number, t: Translations) => {
   if (days <= 0)
     return {
       text: t.userProfileScreen.accountPanel.expired,

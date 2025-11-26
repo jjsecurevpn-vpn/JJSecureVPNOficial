@@ -4,7 +4,7 @@ import { MAP_COLORS } from '../utils/mapUtils.ts';
 import { separateGeographies, CountryInfo } from '../utils/geoMappingUtils.ts';
 
 interface MapGeographyProps {
-  geographies: any[];
+  geographies: Record<string, unknown>[];
   currentCountry: CountryInfo;
 }
 
@@ -31,7 +31,7 @@ export const MapGeography: React.FC<MapGeographyProps> = ({
 
   return (
     <>
-      {otherGeos.map((geo: any) => (
+      {otherGeos.map((geo: Record<string, unknown>) => (
         <Geography
           key={`other-${geo.rsmKey}`}
           geography={geo}
@@ -45,7 +45,7 @@ export const MapGeography: React.FC<MapGeographyProps> = ({
         />
       ))}
 
-      {currentGeos.map((geo: any) => (
+      {currentGeos.map((geo: Record<string, unknown>) => (
         <Geography
           key={`current-${geo.rsmKey}`}
           geography={geo}

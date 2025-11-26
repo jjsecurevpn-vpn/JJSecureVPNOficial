@@ -151,7 +151,7 @@ export function startDevCreditIntegrity(): void {
       }
 
       // Verificar si ya existe el crédito
-      let existing = document.getElementById(CREDIT_ID);
+      const existing = document.getElementById(CREDIT_ID);
       if (existing && existing.textContent === FULL_TEXT) {
         return true;
       }

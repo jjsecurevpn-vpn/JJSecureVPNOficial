@@ -3,7 +3,7 @@
 
 export class DtunnelModalInterceptor {
   private static instance: DtunnelModalInterceptor;
-  private originalMethods: { [key: string]: any } = {};
+  private originalMethods: Record<string, (() => void) | undefined> = {};
   private isIntercepting = false;
 
   static getInstance(): DtunnelModalInterceptor {
@@ -18,26 +18,28 @@ export class DtunnelModalInterceptor {
     if (this.isIntercepting) return;
 
     try {
+      const w = window as unknown as Record<string, unknown>;
       // Guardamos el método original si existe
-      if ((window as any).DtStartCheckUser?.execute) {
-        this.originalMethods.DtStartCheckUser = (
-          window as any
-        ).DtStartCheckUser.execute;
+      const dtStartCheckUser = w.DtStartCheckUser as { execute?: () => void } | undefined;
+      if (dtStartCheckUser?.execute) {
+        this.originalMethods.DtStartCheckUser = dtStartCheckUser.execute;
 
         // Reemplazamos con una función que solo dispara los eventos pero no abre modal
-        (window as any).DtStartCheckUser.execute = () => {
+        dtStartCheckUser.execute = () => {
           console.log("🔄 ModalInterceptor - DtStartCheckUser interceptado");
           
           // Simulamos los eventos que normalmente dispararía el modal nativo
-          if ((window as any).DtCheckUserStartedEvent) {
+          const dtCheckUserStartedEvent = w.DtCheckUserStartedEvent as (() => void) | undefined;
+          if (dtCheckUserStartedEvent) {
             console.log("🚀 ModalInterceptor - Disparando DtCheckUserStartedEvent");
-            (window as any).DtCheckUserStartedEvent();
+            dtCheckUserStartedEvent();
           }
 
           // Aquí podrías hacer la llamada real a la API si tienes acceso directo
           // o usar datos de prueba mientras desarrollas
           setTimeout(() => {
-            if ((window as any).DtCheckUserModelEvent) {
+            const dtCheckUserModelEvent = w.DtCheckUserModelEvent as ((data: string) => void) | undefined;
+            if (dtCheckUserModelEvent) {
               const testData = {
                 expiration_days: "28",
                 limit_connections: "05",
@@ -49,7 +51,7 @@ export class DtunnelModalInterceptor {
                 user_id: "test_user_123"
               };
               console.log("📤 ModalInterceptor - Enviando datos:", testData);
-              (window as any).DtCheckUserModelEvent(JSON.stringify(testData));
+              dtCheckUserModelEvent(JSON.stringify(testData));
             } else {
               console.warn("⚠️ ModalInterceptor - DtCheckUserModelEvent no disponible");
             }
@@ -66,15 +68,16 @@ export class DtunnelModalInterceptor {
   // Restaura el comportamiento original
   restoreOriginalBehavior(): void {
     try {
+      const w = window as unknown as Record<string, unknown>;
       if (
         this.originalMethods.DtStartCheckUser &&
-        (window as any).DtStartCheckUser
+        (w.DtStartCheckUser as { execute?: () => void } | undefined)
       ) {
-        (window as any).DtStartCheckUser.execute =
-          this.originalMethods.DtStartCheckUser;
+        const dtStartCheckUser = w.DtStartCheckUser as { execute?: () => void };
+        dtStartCheckUser.execute = this.originalMethods.DtStartCheckUser;
         this.isIntercepting = false;
       }
-    } catch (error) {
+    } catch {
       // Error restaurando comportamiento original
     }
   }

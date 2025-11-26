@@ -66,7 +66,7 @@ export const getCurrentCountryInfo = (
 /**
  * Extrae código ISO de las propiedades de una geografía
  */
-export const extractISOCode = (geoProperties: any): string => {
+export const extractISOCode = (geoProperties: Record<string, unknown> | null | undefined): string => {
   const props = geoProperties || {};
   let iso2 = (props.ISO_A2 || props.iso_a2 || props.ISO2 || props.iso2 || '').toString().toUpperCase();
   
@@ -86,11 +86,11 @@ export const extractISOCode = (geoProperties: any): string => {
  * Verifica si una geografía corresponde al país actual
  */
 export const isCurrentCountryGeography = (
-  geoProperties: any, 
+  geoProperties: Record<string, unknown> | null | undefined, 
   currentCountry: CountryInfo
 ): boolean => {
   const iso2 = extractISOCode(geoProperties);
-  const nameRaw = (geoProperties.NAME || geoProperties.name || geoProperties.NAME_LONG || geoProperties.ADMIN || '').toString();
+  const nameRaw = ((geoProperties?.NAME as string) || (geoProperties?.name as string) || (geoProperties?.NAME_LONG as string) || (geoProperties?.ADMIN as string) || '').toString();
   const nameNorm = nameRaw ? normalizeGeoCountryName(nameRaw) : '';
 
   // Verificar por código ISO (incluyendo territorios)
@@ -109,14 +109,14 @@ export const isCurrentCountryGeography = (
  * Separa geografías en destacadas (país actual) y normales
  */
 export const separateGeographies = (
-  geographies: any[], 
+  geographies: Record<string, unknown>[], 
   currentCountry: CountryInfo
-): { currentGeos: any[]; otherGeos: any[] } => {
-  const currentGeos: any[] = [];
-  const otherGeos: any[] = [];
+): { currentGeos: Record<string, unknown>[]; otherGeos: Record<string, unknown>[] } => {
+  const currentGeos: Record<string, unknown>[] = [];
+  const otherGeos: Record<string, unknown>[] = [];
 
   geographies.forEach((geo) => {
-    if (isCurrentCountryGeography(geo.properties, currentCountry)) {
+    if (isCurrentCountryGeography(geo.properties as Record<string, unknown> | null | undefined, currentCountry)) {
       currentGeos.push(geo);
     } else {
       otherGeos.push(geo);

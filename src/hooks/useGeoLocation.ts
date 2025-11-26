@@ -193,7 +193,7 @@ async function fetchGeoLocationWithRetry(
           
           return result;
         }
-      } catch (error) {
+      } catch {
         // Esperar entre servicios (excepto el último intento)
         if (serviceIndex < services.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 1000));

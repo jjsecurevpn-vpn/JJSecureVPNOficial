@@ -41,7 +41,7 @@ export interface DtConfigSelectedEventPayload {
   tls_version?: string;
   udp_ports?: number[];
   url_check_user?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -124,6 +124,7 @@ export function onDtunnelEvent<K extends DtunnelEvent>(
   handler: (payload: DtunnelEventMap[K]) => void
 ) {
   console.warn(`⚠️ dtEvents.onDtunnelEvent está deprecado. Usar onDtunnelEvent de unifiedEventsSystem en su lugar.`);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return newOnDtunnelEvent(event as any, handler as any);
 }
 
@@ -135,5 +136,6 @@ export function emitDtunnelEvent<K extends DtunnelEvent>(
   payload: DtunnelEventMap[K]
 ) {
   console.warn(`⚠️ dtEvents.emitDtunnelEvent está deprecado. Usar emitDtunnelEvent de unifiedEventsSystem en su lugar.`);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   newEmitDtunnelEvent(event as any, payload as any);
 }

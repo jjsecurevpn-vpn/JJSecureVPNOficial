@@ -73,8 +73,8 @@ function scaleNumber (value: number, category: ScaleCategory, bp: BreakpointKey)
   return +(value * SCALE_MAP[category][bp]).toFixed(2);
 }
 
-function applyScaleToStyles<T extends Record<string, any>>(styles: T, category: ScaleCategory, bp: BreakpointKey): T {
-  const out: Record<string, any> = {};
+function applyScaleToStyles<T extends Record<string, unknown>>(styles: T, category: ScaleCategory, bp: BreakpointKey): T {
+  const out: Record<string, unknown> = {};
   Object.entries(styles).forEach(([k,v]) => {
     if (typeof v === 'number') {
       out[k] = scaleNumber(v, category, bp);
@@ -117,7 +117,7 @@ interface UnifiedResponsiveContext {
   };
   // Escalado
   scale: (category: ScaleCategory, value: number) => number;
-  scaleStyles: <T extends Record<string, any>>(styles: T, category?: ScaleCategory) => T;
+  scaleStyles: <T extends Record<string, unknown>>(styles: T, category?: ScaleCategory) => T;
   // Tokens procesados
   tokens: {
     font: Record<keyof typeof BASE_TOKENS.font, number>;
@@ -182,16 +182,16 @@ export const UnifiedResponsiveProvider: React.FC<{ children: React.ReactNode }> 
   // Tokens ya resueltos para el breakpoint actual
   const tokens = useMemo(() => {
     const font: Record<string, number> = {};
-    Object.entries(BASE_TOKENS.font).forEach(([k, map]) => { font[k] = (map as any)[bp]; });
+    Object.entries(BASE_TOKENS.font).forEach(([k, map]) => { font[k] = (map as Record<BreakpointKey, number>)[bp]; });
     const spacing = {
       unit: BASE_TOKENS.spacing.unit,
-      container: (BASE_TOKENS.spacing.container as any)[bp],
-      section: (BASE_TOKENS.spacing.section as any)[bp],
-      element: (BASE_TOKENS.spacing.element as any)[bp],
+      container: (BASE_TOKENS.spacing.container as Record<BreakpointKey, number>)[bp],
+      section: (BASE_TOKENS.spacing.section as Record<BreakpointKey, number>)[bp],
+      element: (BASE_TOKENS.spacing.element as Record<BreakpointKey, number>)[bp],
     };
     const height: Record<string, number> = {};
-    Object.entries(BASE_TOKENS.height).forEach(([k, map]) => { height[k] = (map as any)[bp]; });
-    return { font: font as any, spacing, height: height as any };
+    Object.entries(BASE_TOKENS.height).forEach(([k, map]) => { height[k] = (map as Record<BreakpointKey, number>)[bp]; });
+    return { font: font as Record<keyof typeof BASE_TOKENS.font, number>, spacing, height: height as Record<keyof typeof BASE_TOKENS.height, number> };
   }, [bp]);
 
   const ctx: UnifiedResponsiveContext = useMemo(() => ({
@@ -205,13 +205,13 @@ export const UnifiedResponsiveProvider: React.FC<{ children: React.ReactNode }> 
     scale: (category, value) => scaleNumber(value, category, bp),
     scaleStyles: (styles, category = 'component') => applyScaleToStyles(styles, category, bp),
     tokens,
-    value: (map, fallback?: any) => {
-      if (typeof map !== 'object' || map === null) return map as any;
-      return pickResponsiveValue(map as any, bp, fallback) as any;
+    value: <T,>(map: Partial<Record<BreakpointKey, T>> | T, fallback?: T): T => {
+      if (typeof map !== 'object' || map === null) return map as T;
+      return (pickResponsiveValue(map as Partial<Record<BreakpointKey, T>>, bp, fallback) ?? fallback) as T;
     },
     spacePx: (mult = 1) => scaleNumber(BASE_TOKENS.spacing.unit * mult, 'spacing', bp),
     fontPx: (token) => tokens.font[token],
-  }), [w, h, bp, isPortrait, isLandscape, isTouch, flags, tokens]);
+  }), [w, h, bp, isPortrait, isLandscape, isTouch, flags, tokens]) as UnifiedResponsiveContext;
 
   return <ResponsiveCtx.Provider value={ctx}>{children}</ResponsiveCtx.Provider>;
 };

@@ -31,7 +31,7 @@ export const getLicenseInfo = (): string => {
 /**
  * Verificador de componentes (simplificado)
  */
-export const isComponentLicensed = (_componentName: string): boolean => {
+export const isComponentLicensed = (): boolean => {
   // Todos los componentes están licenciados
   return true;
 };

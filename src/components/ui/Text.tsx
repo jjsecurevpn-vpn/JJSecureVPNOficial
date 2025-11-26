@@ -5,7 +5,7 @@
 
 import React, { forwardRef } from 'react';
 import { useResponsiveText, useResponsiveValue } from '../../hooks/useResponsiveScale';
-import { useResponsive, type Breakpoint } from '../../hooks/useResponsive';
+import { type Breakpoint } from '../../hooks/useResponsive';
 // Eliminamos dependencia directa de textStyles para migrar a Tailwind utility-first
 import { colors } from '../../constants/theme';
 
@@ -46,7 +46,7 @@ export interface TextProps extends React.HTMLAttributes<HTMLElement> {
   children: React.ReactNode;
 }
 
-export const Text = forwardRef<HTMLElement, TextProps>(({
+export const Text = forwardRef<unknown, TextProps>(({
   variant = 'body',
   color = 'primary',
   customColor,
@@ -211,9 +211,10 @@ export const Text = forwardRef<HTMLElement, TextProps>(({
   };
 
   const variantClasses = variantClassMap[variant] || '';
-  const existingClassName = (props as any).className || '';
+  const existingClassName = (props as Record<string, unknown>).className || '';
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <Component
       ref={ref as any}
       style={textStyle}

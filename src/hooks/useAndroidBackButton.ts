@@ -1,17 +1,9 @@
 import { useEffect, useRef } from "react";
-import { setAndroidBackButtonListener } from "../utils/appFunctions";
+import { androidBackManager, type AndroidBackHandlerOptions } from "../utils/androidBackManager";
 
-interface UseAndroidBackButtonProps {
+interface UseAndroidBackButtonProps extends AndroidBackHandlerOptions {
   isActive: boolean;
   onBackPressed: () => void;
-  priority?: number; // Mayor = más arriba en la pila
-  /**
-   * Si se devuelve true el evento se consume y no continúa a handlers inferiores.
-   * Útil para flujos internos antes de cerrar el modal.
-   */
-  intercept?: () => boolean;
-  /** Indica que este listener NO debe cerrar un bottom sheet ligero (p.e. panel informativo). */
-  ignoreIfBottomSheet?: boolean;
 }
 
 /**
@@ -40,73 +32,30 @@ export function useAndroidBackButton({
   ignoreIfBottomSheet = false,
 }: UseAndroidBackButtonProps) {
   const handlerRef = useRef(onBackPressed);
-  handlerRef.current = onBackPressed;
   const interceptRef = useRef(intercept);
-  interceptRef.current = intercept;
+
+  useEffect(() => {
+    handlerRef.current = onBackPressed;
+  }, [onBackPressed]);
+
+  useEffect(() => {
+    interceptRef.current = intercept;
+  }, [intercept]);
 
   useEffect(() => {
     if (!isActive) return;
-
-    const w = window as unknown as Record<string, unknown>;
-  const stack: Array<{ fn: () => void; priority: number; intercept?: () => boolean; ignoreIfBottomSheet?: boolean; id: number }> = (w.__BACK_STACK as typeof stack) || [];
-  w.__BACK_STACK = stack;
-    const id = Date.now() + Math.random();
-
-    const entry = {
-      fn: () => handlerRef.current?.(),
+    const unregister = androidBackManager.register(() => handlerRef.current?.(), {
       priority,
-      intercept: interceptRef.current ? () => interceptRef.current?.() === true : undefined,
       ignoreIfBottomSheet,
-      id,
-    };
-
-    stack.push(entry);
-    // Mantener orden (desc) por priority
-    stack.sort((a,b) => b.priority - a.priority || b.id - a.id);
-
-    // Si el controlador global de la app está activo, NO registrar listener propio; solo usar la pila.
-  if (!w.__GLOBAL_APP_BACK && !w.__BACK_DISPATCHER__) {
-      const dispatcher = () => {
-        // Detectar si hay bottom sheet visible (heurística: .bottom-sheet presente y transform sin translateY-full)
-        const sheet = document.querySelector('.bottom-sheet');
-        const sheetVisible = sheet && !/(translateY\(100%|translateY\(\d+px\))/i.test(sheet.getAttribute('style') || '') && sheet.className.includes('translate-y-0');
-
-        for (const item of [...stack]) {
-          if (sheetVisible && item.ignoreIfBottomSheet) continue; // saltar handlers que no deben cerrar sheet
-          try {
-            if (item.intercept && item.intercept()) return; // intercepta sin cerrar
-            item.fn();
-            return;
-          } catch {
-            // Error en handler, continuar a siguiente
-          }
-        }
-      };
-      w.__BACK_DISPATCHER__ = dispatcher;
-      setAndroidBackButtonListener(dispatcher);
-      window.addEventListener('keydown', (e) => { if (e.key === 'Escape') dispatcher(); });
-      // Web fallback history
-      window.history.pushState(null, '', window.location.href);
-      window.addEventListener('popstate', (ev) => { ev.preventDefault(); window.history.pushState(null, '', window.location.href); dispatcher(); });
-    }
-
+      intercept: interceptRef.current,
+    });
     return () => {
-      const idx = stack.findIndex(s => s.id === id);
-      if (idx >= 0) stack.splice(idx, 1);
+      unregister();
     };
   }, [isActive, priority, ignoreIfBottomSheet]);
 }
 
 // Helper para registrar manualmente (p.e. en sistemas sin hook React)
 export function registerAndroidBackHandler(fn: () => void, priority = 0) {
-  const w = window as unknown as Record<string, unknown>;
-  const stack: Array<{ fn: () => void; priority: number; id: number }> = (w.__BACK_STACK as typeof stack) || [];
-  w.__BACK_STACK = stack;
-  const id = Date.now() + Math.random();
-  stack.push({ fn, priority, id });
-  stack.sort((a,b) => b.priority - a.priority || b.id - a.id);
-  return () => {
-    const idx = stack.findIndex(s => s.id === id);
-    if (idx >= 0) stack.splice(idx, 1);
-  };
+  return androidBackManager.registerManual(fn, priority);
 }

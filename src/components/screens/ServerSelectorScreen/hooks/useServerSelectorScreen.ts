@@ -3,40 +3,69 @@
  * @description Hook principal para la lógica de ServerSelectorScreen
  */
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { ConfigCategory, ConfigItem } from "../../../../types/config";
-import { checkForUpdates } from "../../../../utils/appFunctions";
 import { nativeAPI } from "../../../../utils/unifiedNativeAPI";
 import { useActiveConfig } from "../../../../context/ActiveConfigContext";
 import { useAndroidBackButton } from "../../../../hooks/useAndroidBackButton";
 import { getStatusBarHeight, getNavigationBarHeight } from "../../../../utils/deviceUtils";
-import { filterByQuery } from "../../../../utils/serverUtils";
-import {
-  groupItemsByCategory,
-  extractPremiumNumber,
-  Group,
-  getSubcategorySpecs
-} from "../../../../utils/serverGrouping";
 import { useTranslations } from "../../../../context/LanguageContext";
+import { useNativeSelectorBridge } from "./useNativeSelectorBridge";
+import { useServerConfigsLoader } from "./useServerConfigsLoader";
+import { useServerSearchAndGrouping } from "./useServerSearchAndGrouping";
 
 export const useServerSelectorScreen = () => {
-  const [configs, setConfigs] = useState<ConfigCategory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [pendingConfigId, setPendingConfigId] = useState<number | null>(null);
   const [loadingCategoryId, setLoadingCategoryId] = useState<number | null>(null);
-  const [query, setQuery] = useState("");
-  const [, setDebouncedQuery] = useState(query);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
-  const [useNativeSelector, setUseNativeSelector] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
 
   const { activeConfig, setActiveConfigId, refreshActiveConfig } = useActiveConfig();
   const t = useTranslations();
-  
-  // Estado local para lógica de modal (reemplaza useServerSelectorModal)
-  // Inicializar con la primera categoría ya seleccionada
+
   const [selectedCategory, setSelectedCategory] = useState<ConfigCategory | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const initializedRef = useRef(false);
+  // Referencia para rastrear el último servidor activo conocido
+  const lastActiveConfigIdRef = useRef<number | null>(null);
+
+  const {
+    useNativeSelector,
+    setUseNativeSelector,
+    openNativeSelector,
+    toggleNativeSelector: onToggleNativeSelector,
+  } = useNativeSelectorBridge({
+    onError: setLoadError,
+    messages: {
+      missingApi: t.serverSelectorScreen.errorView.loadError,
+      connectionFailed: t.serverSelectorScreen.errorView.connectionFailed,
+    },
+  });
+
+  const {
+    configs,
+    loading,
+    loadConfigs,
+    handleUpdate,
+  } = useServerConfigsLoader({
+    useNativeSelector,
+    setUseNativeSelector,
+    refreshActiveConfig,
+    openNativeSelector,
+    setLoadError,
+    messages: {
+      noServersAvailable: t.serverSelectorScreen.loadingView.noServersAvailable,
+      loadError: t.serverSelectorScreen.errorView.loadError,
+    },
+  });
+
+  const {
+    query,
+    setQuery,
+    groupedItems,
+    filteredItems,
+    expandedGroups,
+    toggleGroup,
+    isGroupExpanded,
+  } = useServerSearchAndGrouping({ selectedCategory, t });
 
   // Hook para manejar el botón back de Android - simplificado para pantalla fija
   useAndroidBackButton({
@@ -44,6 +73,7 @@ export const useServerSelectorScreen = () => {
     onBackPressed: () => {
       if (selectedCategory) {
         setSelectedCategory(null);
+        setQuery('');
       }
       // No hay onClose para pantalla fija
     },
@@ -52,36 +82,8 @@ export const useServerSelectorScreen = () => {
   // Función para manejar selección de categoría
   const originalHandleCategorySelect = useCallback((category: ConfigCategory) => {
     setSelectedCategory(category);
-  }, []);
-
-  // Función para abrir el selector nativo de DTunnel
-  const openNativeSelector = useCallback(() => {
-    try {
-      if (window?.DtExecuteDialogConfig?.execute) {
-        window.DtExecuteDialogConfig.execute();
-        // Ya no se cierra el modal - pantalla fija
-      } else {
-        console.warn("🟡 [SERVER_SELECTOR] API nativa no disponible");
-        setLoadError(t.serverSelectorScreen.errorView.loadError);
-      }
-    } catch (error) {
-      console.error("🔴 [SERVER_SELECTOR] Error al abrir selector nativo:", error);
-      setLoadError(t.serverSelectorScreen.errorView.connectionFailed);
-    }
-  }, []);
-
-  // Toggle entre selector personalizado y nativo
-  const onToggleNativeSelector = useCallback(() => {
-    if (useNativeSelector) {
-      // Cambiar a personalizado
-      setUseNativeSelector(false);
-      loadConfigs();
-    } else {
-      // Cambiar a nativo
-      setUseNativeSelector(true);
-      openNativeSelector();
-    }
-  }, [useNativeSelector, openNativeSelector]);
+    setQuery('');
+  }, [setQuery]);
 
   // Función de selección de categoría con loading
   const handleCategorySelect = useCallback((category: ConfigCategory) => {
@@ -99,141 +101,6 @@ export const useServerSelectorScreen = () => {
     }, 300); // Reducir delay para mejor UX
   }, [originalHandleCategorySelect, useNativeSelector, openNativeSelector]);
 
-  // Debounce query to avoid filtering on every keystroke
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedQuery(query.trim()), 250);
-    return () => clearTimeout(t);
-  }, [query]);
-
-  useEffect(() => {
-    if (!useNativeSelector) { // Siempre cargar para pantalla fija
-      loadConfigs();
-    }
-  }, [useNativeSelector]);
-
-  const loadConfigs = useCallback(() => {
-    if (useNativeSelector) return;
-    
-    setLoading(true);
-    setLoadError(null);
-    
-    try {
-      // Obtener configs si la API está disponible; si no, continuar con array vacío.
-      let allConfigs: ConfigCategory[] = [];
-      if (window?.DtGetConfigs?.execute) {
-        try {
-          allConfigs = nativeAPI.config.getAll() || [];
-        } catch (inner) {
-          console.warn('[SERVER_SELECTOR] Error leyendo configs nativas, se usarán mocks si procede:', inner);
-          allConfigs = [];
-        }
-      } else {
-        console.warn('[SERVER_SELECTOR] API nativa DtGetConfigs ausente - se evaluará uso de mocks');
-      }
-
-      const urlParams = (typeof window !== 'undefined') ? new URLSearchParams(window.location.search) : null;
-      const forceMock = urlParams?.get('mockServers') === '1';
-
-      let finalConfigs = allConfigs;
-      const shouldMock = forceMock || !allConfigs || allConfigs.length === 0;
-
-      if (shouldMock) {
-        const mockCategories: ConfigCategory[] = [
-          {
-            id: 90001,
-            name: 'MOCK PREMIUM',
-            sorter: 1,
-            color: '#4ade80',
-            items: Array.from({ length: 6 }).map((_, i) => ({
-              id: 91000 + i,
-              name: `Premium #${i + 1}`,
-              description: 'Servidor mock premium para pruebas de navegación con control remoto',
-              mode: i % 2 === 0 ? 'SSH_PROXY' : 'V2RAY',
-              sorter: i + 1,
-              icon: 'https://via.placeholder.com/40x40.png?text=P',
-              auth: i % 2 === 0 ? {} : { v2ray_uuid: '00000000-0000-0000-0000-000000000000' }
-            }))
-          },
-          {
-            id: 90004,
-            name: '[GRATUITO] MOCK FREE',
-            sorter: 1.5,
-            color: '#00b96b',
-            items: Array.from({ length: 4 }).map((_, i) => ({
-              id: 91500 + i,
-              name: `Free SSH ${i + 1} [AR]`,
-              description: 'Servidor gratuito público (mock)',
-              mode: 'SSH_PROXY',
-              sorter: i + 1,
-              icon: 'https://via.placeholder.com/40x40.png?text=F'
-            }))
-          },
-          {
-            id: 90002,
-            name: 'MOCK HYSTERIA',
-            sorter: 2,
-            color: '#f59e0b',
-            items: Array.from({ length: 4 }).map((_, i) => ({
-              id: 92000 + i,
-              name: `UDP HYSTERIA ${i + 1}`,
-              description: 'Mock hysteria para test de agrupación',
-              mode: 'HYSTERIA',
-              sorter: i + 1,
-              icon: 'https://via.placeholder.com/40x40.png?text=H'
-            }))
-          },
-          {
-            id: 90003,
-            name: 'OTROS MOCK',
-            sorter: 3,
-            color: '#6366f1',
-            items: [
-              {
-                id: 93001,
-                name: 'VPN MIX #1',
-                description: 'Servidor mixto para pruebas',
-                mode: 'SSH_PROXY',
-                sorter: 1,
-                icon: 'https://via.placeholder.com/40x40.png?text=M'
-              },
-              {
-                id: 93002,
-                name: 'Premium DNS #2',
-                description: 'DNS sin anuncios - mock',
-                mode: 'SSH_PROXY',
-                sorter: 2,
-                icon: 'https://via.placeholder.com/40x40.png?text=D'
-              }
-            ]
-          }
-        ];
-        finalConfigs = mockCategories;
-        console.warn('[MOCK] Inyectando servidores mock para pruebas de navegación (motivo:', forceMock ? 'forceMock' : 'sin-configs o API ausente', ')');
-      }
-
-      if (!finalConfigs || finalConfigs.length === 0) {
-        throw new Error(t.serverSelectorScreen.loadingView.noServersAvailable);
-      }
-
-      setConfigs(finalConfigs);
-      refreshActiveConfig();
-      setLoading(false);
-
-    } catch (error) {
-      console.error('🔴 [SERVER_SELECTOR] Error al cargar configuraciones:', error);
-      setLoadError(error instanceof Error ? error.message : t.serverSelectorScreen.errorView.loadError);
-      
-      // Fallback automático al selector nativo si hay errores críticos
-      setTimeout(() => {
-        setLoading(false);
-        if (error instanceof Error && error.message.includes("API") && !useNativeSelector) {
-          console.warn("🟡 [SERVER_SELECTOR] Fallback automático al selector nativo");
-          setUseNativeSelector(true);
-          openNativeSelector();
-        }
-      }, 1000);
-    }
-  }, [useNativeSelector, refreshActiveConfig, openNativeSelector]);
 
   const handleConfigSelect = useCallback((config: ConfigItem) => {
     if (useNativeSelector) {
@@ -306,40 +173,43 @@ export const useServerSelectorScreen = () => {
     }
   }, [setActiveConfigId, useNativeSelector, openNativeSelector]);
 
-  const handleUpdate = useCallback(() => {
-    if (useNativeSelector) {
-      openNativeSelector();
-      return;
-    }
-
-    setLoading(true);
-    setLoadError(null);
-    try {
-      checkForUpdates();
-    } catch (error) {
-      console.error("🔴 [SERVER_SELECTOR] Error al actualizar:", error);
-      setLoadError(t.serverSelectorScreen.errorView.loadError);
-    } finally {
-      // Reconsulta configs tras solicitar actualización
-      setTimeout(() => loadConfigs(), 200);
-    }
-  }, [loadConfigs, useNativeSelector, openNativeSelector]);
-
-  // Resetear búsqueda al cambiar de categoría (pero sin cerrar grupos ya abiertos)
+  // Auto-seleccionar la categoría del servidor activo al cargar configs
+  // Si no hay servidor activo, seleccionar la primera categoría
   useEffect(() => {
-    setQuery("");
-    setDebouncedQuery("");
-  }, [selectedCategory]);
-
-  // Auto-seleccionar primera categoría al cargar configs y expandir grupos
-  useEffect(() => {
-    if (configs.length > 0 && !isInitialized) {
-      setSelectedCategory(configs[0]);
-      setIsInitialized(true);
-      // Pre-expandir el primer grupo
-      setExpandedGroups({ 'premium-ssh': true });
+    if (configs.length > 0 && !initializedRef.current) {
+      // Buscar la categoría que contiene el servidor activo
+      const categoryWithActiveConfig = activeConfig
+        ? configs.find((c) => c.items.some((it) => it.id === activeConfig.id))
+        : null;
+      
+      // Usar la categoría activa o la primera si no hay servidor activo
+      setSelectedCategory(categoryWithActiveConfig || configs[0]);
+      setQuery('');
+      initializedRef.current = true;
+      // Guardar el ID del servidor activo actual
+      lastActiveConfigIdRef.current = activeConfig?.id ?? null;
     }
-  }, [configs, isInitialized]);
+  }, [configs, activeConfig, setQuery]);
+
+  // Sincronizar categoría seleccionada cuando cambie el servidor activo externamente
+  // Esto asegura que al volver a la pantalla, se muestre la categoría del servidor actual
+  useEffect(() => {
+    if (configs.length > 0 && activeConfig && initializedRef.current) {
+      // Solo sincronizar si el servidor activo cambió desde la última vez
+      if (lastActiveConfigIdRef.current !== activeConfig.id) {
+        const categoryWithActiveConfig = configs.find((c) => 
+          c.items.some((it) => it.id === activeConfig.id)
+        );
+        
+        if (categoryWithActiveConfig) {
+          setSelectedCategory(categoryWithActiveConfig);
+          setQuery('');
+        }
+        // Actualizar la referencia
+        lastActiveConfigIdRef.current = activeConfig.id;
+      }
+    }
+  }, [configs, activeConfig, setQuery]);
 
   // Cleanup effect - ya no necesario para pantalla fija
   // Los estados se mantienen durante la sesión de la pantalla
@@ -352,46 +222,13 @@ export const useServerSelectorScreen = () => {
     return configs.find((c) => c.items.some((it) => it.id === activeConfig.id)) || null;
   }, [configs, activeConfig]);
 
-  const filteredItems = useMemo((): ConfigItem[] => {
-    if (!selectedCategory) return [];
-    return filterByQuery(selectedCategory.items, query);
-  }, [selectedCategory, query]);
-
   // Auto seleccionar primera categoría si el usuario comienza a escribir y no hay categoría aún
   useEffect(() => {
     if (!selectedCategory && query.trim().length > 0 && configs.length > 0) {
       setSelectedCategory(configs[0]);
+      setQuery('');
     }
-  }, [query, selectedCategory, configs]);
-
-  // Agrupación por subcategorías usando utilidades reutilizables
-  const groupedItems = useMemo((): Group<ConfigItem>[] => {
-    const specs = getSubcategorySpecs(t);
-    const groups = groupItemsByCategory<ConfigItem>(filteredItems, specs, t);
-    
-    // Ordenar items dentro de cada grupo
-    groups.forEach(group => {
-      group.items.sort((a, b) => {
-        if (group.key === "premium-ssh") {
-          const numA = extractPremiumNumber(a);
-          const numB = extractPremiumNumber(b);
-          return numA - numB;
-        }
-        return (a.name || "").localeCompare(b.name || "");
-      });
-    });
-    
-    return groups;
-  }, [filteredItems, t]);
-
-  // UI State helpers
-  const toggleGroup = useCallback((groupKey: string) => {
-    setExpandedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
-  }, []);
-
-  const isGroupExpanded = useCallback((groupKey: string) => {
-    return expandedGroups[groupKey] ?? false; // Default: colapsado
-  }, [expandedGroups]);
+  }, [configs, query, selectedCategory, setQuery]);
 
   // Height calculations
   const statusBarHeight = getStatusBarHeight();

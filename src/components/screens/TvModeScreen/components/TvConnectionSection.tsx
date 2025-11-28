@@ -4,6 +4,8 @@ import { ResponsiveConnectionButton } from './ResponsiveConnectionButton';
 import { ResponsiveLogsButton } from './ResponsiveLogsButton';
 import { StepSection } from './StepSection';
 import type { ConfigItem } from '../../../../types/config';
+import type { UnifiedVpnState } from '../../../../hooks/useUnifiedVpn';
+import type { VpnState } from '../../../../types/vpn';
 
 interface TvConnectionSectionProps {
   headerSize: 'small' | 'medium' | 'large';
@@ -14,8 +16,8 @@ interface TvConnectionSectionProps {
   contentJustifyClass: string;
   activeConfig: ConfigItem | null;
   formError: string | null;
-  vpn: Record<string, unknown>;
-  onConnection: () => Record<string, unknown>;
+  vpn: UnifiedVpnState;
+  onConnection: () => void | Promise<void | VpnState | null>;
   showServerDescription: boolean;
 }
 

@@ -38,8 +38,8 @@ export function useVirtualCursor(opts: VirtualCursorOptions = {}): VirtualCursor
 
   const [active, setActive] = useState(false);
   const [pos, setPos] = useState(initial);
-  // Eliminado showHint (no se usa en nueva UI)
   const [debug, setDebug] = useState(false);
+  const [precision, setPrecision] = useState(false);
 
   const stateRef = useRef({
     keys: new Set<string>(),
@@ -80,11 +80,11 @@ export function useVirtualCursor(opts: VirtualCursorOptions = {}): VirtualCursor
     stateRef.current.keys.clear();
     if (stateRef.current.raf) cancelAnimationFrame(stateRef.current.raf);
     stateRef.current.raf = 0;
+    stateRef.current.precision = false;
+    setPrecision(false);
   }, []);
 
-  // Movimiento frame a frame independiente de auto-repeat
-  const loopRef = useRef<(ts:number)=>void>(()=>{});
-  loopRef.current = (ts:number) => {
+  const step = useCallback(function stepLoop(ts: number) {
     if (!activeRef.current) { stateRef.current.raf = 0; return; }
     if (!stateRef.current.lastTs) stateRef.current.lastTs = ts;
     const dt = ts - stateRef.current.lastTs;
@@ -111,8 +111,8 @@ export function useVirtualCursor(opts: VirtualCursorOptions = {}): VirtualCursor
       st.holdStart = 0;
       st.speedFactor = 1;
     }
-    st.raf = requestAnimationFrame(loopRef.current!);
-  };
+    st.raf = requestAnimationFrame(stepLoop);
+  }, [accelMs, clamp, maxFactor, precisionFactor, speed]);
 
   // Key handlers (usa claves normalizadas internas: up/down/left/right)
   useEffect(() => {
@@ -134,16 +134,23 @@ export function useVirtualCursor(opts: VirtualCursorOptions = {}): VirtualCursor
       } else if (activeRef.current && k === 'd') {
         setDebug(v=>!v);
       } else if (k === 'shift' || k === 'alt') {
-        stateRef.current.precision = true;
+        if (!stateRef.current.precision) {
+          stateRef.current.precision = true;
+          setPrecision(true);
+        }
       }
       if (activeRef.current && !stateRef.current.raf) {
         stateRef.current.lastTs = 0;
-        stateRef.current.raf = requestAnimationFrame(ts => loopRef.current?.(ts));
+        stateRef.current.raf = requestAnimationFrame(step);
       }
     };
     const up = (e: KeyboardEvent) => {
       const k = e.key.toLowerCase();
-      if (k === 'shift' || k === 'alt') { stateRef.current.precision = false; return; }
+      if (k === 'shift' || k === 'alt') { 
+        stateRef.current.precision = false; 
+        setPrecision(false);
+        return; 
+      }
       if (['arrowup','w'].includes(k)) stateRef.current.keys.delete('up');
       else if (['arrowdown','s'].includes(k)) stateRef.current.keys.delete('down');
       else if (['arrowleft','a'].includes(k)) stateRef.current.keys.delete('left');
@@ -155,7 +162,7 @@ export function useVirtualCursor(opts: VirtualCursorOptions = {}): VirtualCursor
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
-  }, [enable, enableCursor, disableCursor, center, accelMs, maxFactor, speed, precisionFactor]);
+  }, [enable, enableCursor, disableCursor, center, accelMs, maxFactor, speed, precisionFactor, step]);
 
   useEffect(() => {
     activeRef.current = active;
@@ -175,6 +182,6 @@ export function useVirtualCursor(opts: VirtualCursorOptions = {}): VirtualCursor
     center,
     debug,
     toggleDebug: () => setDebug(v=>!v),
-    precision: stateRef.current.precision
+    precision,
   };
 }

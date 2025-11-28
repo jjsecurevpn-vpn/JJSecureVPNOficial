@@ -1,5 +1,7 @@
 import { useTranslations } from '../../../../hooks/useTranslations';
 import { ResponsiveStatusIcon } from './ResponsiveStatusIcon';
+import type { UnifiedVpnState } from '../../../../hooks/useUnifiedVpn';
+import type { VpnState } from '../../../../types/vpn';
 
 const BASE_BUTTON_STYLE = { text: 'text-white' };
 const TV_BUTTON_STYLES: Record<string, { bg: string; text: string; pulse?: boolean }> = {
@@ -12,23 +14,31 @@ const TV_BUTTON_STYLES: Record<string, { bg: string; text: string; pulse?: boole
   DISCONNECTED: { ...BASE_BUTTON_STYLE, bg: 'bg-success hover:bg-success-strong' },
 };
 
-function getVpnStateLabel(state: string, labelMap: Record<string, unknown>) {
+function getVpnStateLabel(state: string, labelMap: Record<string, string>) {
   switch (state) {
-    case 'CONNECTED': return (labelMap as Record<string, unknown>).connected;
-    case 'CONNECTING': return (labelMap as Record<string, unknown>).connecting;
-    case 'AUTH': return (labelMap as Record<string, unknown>).auth;
-    case 'STOPPING': return (labelMap as Record<string, unknown>).stopping;
-    case 'AUTH_FAILED': return (labelMap as Record<string, unknown>).authFailed;
-    case 'NO_NETWORK': return (labelMap as Record<string, unknown>).noNetwork;
+    case 'CONNECTED': return labelMap.connected;
+    case 'CONNECTING': return labelMap.connecting;
+    case 'AUTH': return labelMap.auth;
+    case 'STOPPING': return labelMap.stopping;
+    case 'AUTH_FAILED': return labelMap.authFailed;
+    case 'NO_NETWORK': return labelMap.noNetwork;
     case 'DISCONNECTED':
-    default: return (labelMap as Record<string, unknown>).disconnected;
+    default: return labelMap.disconnected;
   }
 }
 
-export function ResponsiveConnectionButton({ vpn, onConnection, size, compact = false }: { vpn: Record<string, unknown>; onConnection: () => void; size: 'small' | 'medium' | 'large'; compact?: boolean }) {
+interface ResponsiveConnectionButtonProps {
+  vpn: UnifiedVpnState;
+  onConnection: () => void | Promise<void | VpnState | null>;
+  size: 'small' | 'medium' | 'large';
+  compact?: boolean;
+}
+
+export function ResponsiveConnectionButton({ vpn, onConnection, size, compact = false }: ResponsiveConnectionButtonProps) {
   const { t } = useTranslations();
-  const vpnState = (vpn.state as unknown as string) || 'DISCONNECTED';
-  const label = getVpnStateLabel(vpnState, t.bottomSheetServerSelector.connectionButtons.vpnStates) as unknown as string;
+  const vpnState = vpn.state || 'DISCONNECTED';
+  const labelMap = t.bottomSheetServerSelector.connectionButtons.vpnStates as Record<string, string>;
+  const label = getVpnStateLabel(vpnState, labelMap);
   const style = TV_BUTTON_STYLES[vpnState] || TV_BUTTON_STYLES.DISCONNECTED;
   
   // HD-specific optimization
@@ -53,7 +63,7 @@ export function ResponsiveConnectionButton({ vpn, onConnection, size, compact = 
       data-vc-focusable
     >
       <div className="transition-all duration-300">
-        <ResponsiveStatusIcon state={vpnState} connected={(vpn.isConnected as unknown as boolean) || false} size={sizeConfig.iconSize} />
+        <ResponsiveStatusIcon state={vpnState} connected={vpn.isConnected} size={sizeConfig.iconSize} />
       </div>
       <span className="font-bold leading-tight text-center">{label}</span>
     </button>

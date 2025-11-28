@@ -5,6 +5,8 @@ import {
   useEffect,
   ReactNode,
   useRef,
+  useMemo,
+  useCallback,
 } from "react";
 import { nativeAPI } from "../utils";
 import type { ConfigItem } from "../types/config";
@@ -25,12 +27,12 @@ export const ActiveConfigProvider = ({ children }: { children: ReactNode }) => {
   const lastConfigKeyRef = useRef<string>('');
 
   // Función para generar clave única de configuración
-  const getConfigKey = (config: ConfigItem | null): string => {
+  const getConfigKey = useCallback((config: ConfigItem | null): string => {
     return config ? `${config.id}:${config.name}` : 'none';
-  };
+  }, []);
 
-  // Función optimizada para verificar cambios
-  const checkForChanges = () => {
+  // Función optimizada para verificar cambios con useCallback
+  const checkForChanges = useCallback(() => {
     try {
       const current = nativeAPI.config.getActive();
       const currentKey = getConfigKey(current);
@@ -42,22 +44,22 @@ export const ActiveConfigProvider = ({ children }: { children: ReactNode }) => {
     } catch {
       // Silencioso
     }
-  };
+  }, [getConfigKey]);
 
-  // Polling agresivo al montar
+  // Polling optimizado - reducido a 1000ms
   useEffect(() => {
     // Check inicial
     checkForChanges();
     
-    // Polling cada 500ms (menos agresivo)
-    intervalRef.current = setInterval(checkForChanges, 500);
+    // Polling cada 1000ms (optimizado desde 500ms)
+    intervalRef.current = setInterval(checkForChanges, 1000);
     
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
-  }, []);
+  }, [checkForChanges]);
 
   // Event listeners básicos
   useEffect(() => {
@@ -104,20 +106,25 @@ export const ActiveConfigProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const refreshActiveConfig = () => {
+  const refreshActiveConfig = useCallback(() => {
     checkForChanges();
-  };
+  }, [checkForChanges]);
 
-  const setActiveConfigId = (id: number) => {
+  const setActiveConfigId = useCallback((id: number) => {
     nativeAPI.config.setActive(id);
     setTimeout(checkForChanges, 100);
     setTimeout(checkForChanges, 300);
-  };
+  }, [checkForChanges]);
+
+  // Memoizar valor del contexto para evitar re-renders innecesarios
+  const contextValue = useMemo(() => ({
+    activeConfig,
+    setActiveConfigId,
+    refreshActiveConfig,
+  }), [activeConfig, setActiveConfigId, refreshActiveConfig]);
 
   return (
-    <ActiveConfigContext.Provider
-      value={{ activeConfig, setActiveConfigId, refreshActiveConfig }}
-    >
+    <ActiveConfigContext.Provider value={contextValue}>
       {children}
     </ActiveConfigContext.Provider>
   );

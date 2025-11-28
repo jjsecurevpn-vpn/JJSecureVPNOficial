@@ -13,23 +13,23 @@ export interface MapColors {
   highlightedHover: { fill: string };
 }
 
-// Configuración de colores del mapa
+// Configuración de colores del mapa (transparentes)
 export const MAP_COLORS: MapColors = {
   default: {
-    fill: 'rgba(71, 85, 105, 0.6)',
-    stroke: 'rgba(71, 85, 105, 0.9)',
+    fill: 'rgba(71, 85, 105, 0.15)',
+    stroke: 'rgba(71, 85, 105, 0.30)',
     strokeWidth: 1.5
   },
   highlighted: {
-    fill: 'rgba(107, 114, 128, 0.7)',
-    stroke: 'rgba(107, 114, 128, 1)',
+    fill: 'rgba(139, 92, 246, 0.35)',
+    stroke: 'rgba(139, 92, 246, 0.70)',
     strokeWidth: 2.5
   },
   defaultHover: {
-    fill: 'rgba(71, 85, 105, 0.8)'
+    fill: 'rgba(71, 85, 105, 0.25)'
   },
   highlightedHover: {
-    fill: 'rgba(107, 114, 128, 0.9)'
+    fill: 'rgba(139, 92, 246, 0.45)'
   }
 } as const;
 

@@ -1,15 +1,12 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
-import { ComposableMap, Geographies, ZoomableGroup } from 'react-simple-maps';
 import type { ConnectionState } from '../../utils/connectionStates';
 import '../../styles/animations-map.css';
 
 import { useGeoLocation } from '../../hooks/useGeoLocation';
 import { useNativeLocation } from './hooks/useNativeLocation.ts';
 import { MapBackground } from './components/MapBackground.tsx';
-import { MapMarker } from './components/MapMarker.tsx';
-import { MapGeography } from './components/MapGeography.tsx';
-import { 
-  GEO_URL, 
+import { MapCanvas } from './components/MapCanvas.tsx';
+import {
   getSmartCoords,
   MAP_TRANSITION_MS,
   MAP_FALLBACK_DELAY,
@@ -133,59 +130,29 @@ export default function MapLatAmVPN({
 
   const shouldShowMap = (geoData?.latitude && geoData?.longitude) || showFallback;
   const transitionClass = isTransitioning ? 'map-transitioning' : 'map-stable';
+  const renderOverlay = (label: string) => (
+    <div className="absolute inset-0 flex items-center justify-center bg-slate-900/85 z-10">
+      <div className="text-center">
+        <div className="mb-2 inline-flex">
+          <span className="spinner-sm border-blue-500 border-t-transparent" />
+        </div>
+        <div className="text-white/60 text-xs">{label}</div>
+      </div>
+    </div>
+  );
 
   return (
     <MapBackground showGrid={showGrid} className={`${className} ${transitionClass}`}>
       {/* Indicador de carga */}
-      {!shouldShowMap && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-900/85 z-10">
-          <div className="text-center">
-            <div className="mb-2 inline-flex">
-              <span className="spinner-sm border-blue-500 border-t-transparent" />
-            </div>
-            <div className="text-white/60 text-xs">Ubicando...</div>
-          </div>
-        </div>
-      )}
+      {!shouldShowMap && renderOverlay('Ubicando...')}
 
       {shouldShowMap && (
-        <ComposableMap
-          projection="geoMercator"
-          projectionConfig={{
-            scale: 1200,
-            center: [finalCoords[0], finalCoords[1] - 7]
-          }}
-          width={800}
-          height={450}
-          className="w-full h-full"
-          style={{ 
-            transform: 'translate3d(0, 0, 0)',
-            imageRendering: 'auto'
-          }}
-        >
-          <ZoomableGroup
-            center={[0, 0]}
-            zoom={1}
-            translateExtent={[[-250, -120], [250, 120]]}
-            className="map-zoom-group"
-          >
-            <Geographies geography={GEO_URL}>
-              {({ geographies }) => (
-                <MapGeography 
-                  geographies={geographies}
-                  currentCountry={currentCountry}
-                />
-              )}
-            </Geographies>
-
-            <MapMarker 
-              coordinates={finalCoords}
-              vpnState={vpnState}
-              isTransitioning={isTransitioning}
-              className="map-marker"
-            />
-          </ZoomableGroup>
-        </ComposableMap>
+        <MapCanvas 
+          coordinates={finalCoords}
+          currentCountry={currentCountry}
+          vpnState={vpnState}
+          isTransitioning={isTransitioning}
+        />
       )}
     </MapBackground>
   );

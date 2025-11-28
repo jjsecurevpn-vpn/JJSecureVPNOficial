@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useTranslations } from "../../../hooks/useTranslations";
 
 interface ServerConfig {
@@ -10,7 +11,10 @@ interface ServerInfoProps {
   compact?: boolean;
 }
 
-export function ServerInfo({ activeConfig, compact = false }: ServerInfoProps) {
+/**
+ * ServerInfo - Componente memoizado para mostrar información del servidor
+ */
+function ServerInfoComponent({ activeConfig, compact = false }: ServerInfoProps) {
   const { t } = useTranslations();
   const labels = t.bottomSheetServerSelector.serverInfo;
   
@@ -51,6 +55,20 @@ export function ServerInfo({ activeConfig, compact = false }: ServerInfoProps) {
     </div>
   );
 }
+
+// Función de comparación para evitar re-renders innecesarios
+function arePropsEqual(
+  prevProps: ServerInfoProps, 
+  nextProps: ServerInfoProps
+): boolean {
+  return (
+    prevProps.compact === nextProps.compact &&
+    prevProps.activeConfig?.name === nextProps.activeConfig?.name &&
+    prevProps.activeConfig?.description === nextProps.activeConfig?.description
+  );
+}
+
+export const ServerInfo = memo(ServerInfoComponent, arePropsEqual);
 
 function ServerRackIcon({ size, className }: { size: number; className?: string }) {
   return (

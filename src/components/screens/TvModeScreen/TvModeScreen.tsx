@@ -8,6 +8,7 @@ import { useServerSelectorScreen } from '../ServerSelectorScreen/hooks/useServer
 import { ServerView } from '../ServerSelectorScreen/components/ServerView';
 import { useTranslations } from '../../../hooks/useTranslations';
 import { nativeAPI } from '../../../utils';
+import { flushPendingCredentials } from '../../../utils/credentialSync';
 import { useSafeArea } from '../../../utils/deviceUtils';
 import { useResponsive } from '../../../hooks/useResponsive';
 import { useResponsiveUI } from '../../../responsive/unifiedResponsive';
@@ -97,6 +98,7 @@ export const TvModeScreen: React.FC = () => {
     type?: 'missingserver' | 'missingcredentials' | 'missingsetup';
     message?: string;
   } => {
+    flushPendingCredentials();
     const hasServer = Boolean(nativeAPI.config.getActive());
     const needsUsername = nativeAPI.auth.shouldShowInput('username');
     const needsPassword = nativeAPI.auth.shouldShowInput('password');

@@ -6,6 +6,7 @@ import { useNetSpeeds } from "../../hooks/useNetSpeeds";
 import { useUnifiedVpn } from "../../hooks/useUnifiedVpn";
 import { useActiveConfig } from "../../context/ActiveConfigContext";
 import { nativeAPI } from "../../utils";
+import { flushPendingCredentials } from "../../utils/credentialSync";
 import { getNavigationBarHeight } from "../../utils/deviceUtils";
 
 import { useBottomSheetGestures } from "./hooks";
@@ -193,6 +194,7 @@ export function BottomSheetServerSelector({
     type?: "missingserver" | "missingcredentials" | "missingsetup";
     message?: string;
   } => {
+    flushPendingCredentials();
     const active = nativeAPI.config.getActive();
     const hasServer = Boolean(active);
     const needsUsername = nativeAPI.auth.shouldShowInput("username");
@@ -396,7 +398,7 @@ export function BottomSheetServerSelector({
   const speedsRef = useRef<HTMLDivElement | null>(null);
   const [speedsHeight, setSpeedsHeight] = useState(0);
   const prevConnectedRef = useRef<boolean>(vpn.isConnected);
-  const [speedsBootstrapped, setSpeedsBootstrapped] = useState(false);
+  const [, setSpeedsBootstrapped] = useState(false);
 
   useEffect(() => {
     const prev = prevConnectedRef.current;
@@ -491,7 +493,6 @@ export function BottomSheetServerSelector({
                   <SpeedStats
                     netSpeeds={netSpeeds}
                     isConnected={vpn.isConnected}
-                    speedsBootstrapped={speedsBootstrapped}
                   />
                 </div>
               </div>

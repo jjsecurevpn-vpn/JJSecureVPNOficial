@@ -3,7 +3,7 @@
  * @description Componente de texto reutilizable con escalado responsivo automático
  */
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { useResponsiveText, useResponsiveValue } from '../../hooks/useResponsiveScale';
 import { type Breakpoint } from '../../hooks/useResponsive';
 // Eliminamos dependencia directa de textStyles para migrar a Tailwind utility-first
@@ -11,6 +11,24 @@ import { colors } from '../../constants/theme';
 
 // Tipos para propiedades responsivas
 type ResponsiveValue<T> = T | Partial<Record<Breakpoint, T>>;
+type TextAlignValue = 'left' | 'center' | 'right' | 'justify';
+
+const PRESET_SIZE_MAP = {
+  xs: { fontSize: 12, lineHeight: 16 },
+  sm: { fontSize: 14, lineHeight: 20 },
+  md: { fontSize: 16, lineHeight: 24 },
+  lg: { fontSize: 18, lineHeight: 28 },
+  xl: { fontSize: 20, lineHeight: 28 },
+} as const;
+
+const WEIGHT_MAP = {
+  normal: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+} as const;
+
+const toPxString = (value: string | number) => (typeof value === 'number' ? `${value}px` : value);
 
 export interface TextProps extends React.HTMLAttributes<HTMLElement> {
   /** Variante de texto del sistema de diseño */
@@ -78,96 +96,71 @@ export const Text = forwardRef<unknown, TextProps>(({
     }
   };
 
-  const getSizeStyle = () => {
-    if (!size) return {};
-    
-    const responsiveSize = useResponsiveValue(size);
-    
-    // Si es un tamaño predefinido
-    if (typeof responsiveSize === 'string' && ['xs', 'sm', 'md', 'lg', 'xl'].includes(responsiveSize)) {
-      const sizeMap = {
-        xs: { fontSize: 12, lineHeight: 16 },
-        sm: { fontSize: 14, lineHeight: 20 },
-        md: { fontSize: 16, lineHeight: 24 },
-        lg: { fontSize: 18, lineHeight: 28 },
-        xl: { fontSize: 20, lineHeight: 28 },
-      };
-      
-      const sizeConfig = sizeMap[responsiveSize as keyof typeof sizeMap];
-      
-      if (disableScaling) {
-        return {
-          fontSize: `${sizeConfig.fontSize}px`,
-          lineHeight: `${sizeConfig.lineHeight}px`,
-        };
-      }
-      
-      return {
-        fontSize: scaleFontSize(sizeConfig.fontSize),
-        lineHeight: scaleFontSize(sizeConfig.lineHeight),
-      };
-    }
-    
-    // Si es un valor numérico o string personalizado
-    if (responsiveSize !== undefined) {
-      if (disableScaling) {
-        return {
-          fontSize: typeof responsiveSize === 'number' ? `${responsiveSize}px` : responsiveSize,
-        };
-      }
-      
-      return {
-        fontSize: scaleFontSize(responsiveSize),
-      };
-    }
-    
-    return {};
-  };
+  const resolvedSize = useResponsiveValue<string | number | undefined>(
+    (size ?? undefined) as ResponsiveValue<string | number | undefined>,
+  );
+  const resolvedWeight = useResponsiveValue<string | number | undefined>(
+    (weight ?? undefined) as ResponsiveValue<string | number | undefined>,
+  );
+  const resolvedAlign = useResponsiveValue<TextAlignValue | undefined>(
+    (align ?? undefined) as ResponsiveValue<TextAlignValue | undefined>,
+  );
+  const resolvedLineHeight = useResponsiveValue<string | number | undefined>(
+    (lineHeight ?? undefined) as ResponsiveValue<string | number | undefined>,
+  );
 
-  const getWeightStyle = () => {
-    if (!weight) return {};
-    
-    const responsiveWeight = useResponsiveValue(weight);
-    
-    if (typeof responsiveWeight === 'string') {
-      const weightMap = {
-        normal: 400,
-        medium: 500,
-        semibold: 600,
-        bold: 700,
-      };
-      
-      return { fontWeight: weightMap[responsiveWeight] || 400 };
-    }
-    
-    if (typeof responsiveWeight === 'number') {
-      return { fontWeight: responsiveWeight };
-    }
-    
-    return {};
-  };
+  const sizeStyle = useMemo(() => {
+    if (resolvedSize === undefined) return {};
 
-  const getLineHeightStyle = () => {
-    if (!lineHeight) return {};
-    
-    const responsiveLineHeight = useResponsiveValue(lineHeight);
-    
-    if (responsiveLineHeight !== undefined) {
+    if (typeof resolvedSize === 'string' && resolvedSize in PRESET_SIZE_MAP) {
+      const config = PRESET_SIZE_MAP[resolvedSize as keyof typeof PRESET_SIZE_MAP];
       if (disableScaling) {
         return {
-          lineHeight: typeof responsiveLineHeight === 'number' 
-            ? `${responsiveLineHeight}px` 
-            : responsiveLineHeight,
+          fontSize: toPxString(config.fontSize),
+          lineHeight: toPxString(config.lineHeight),
         };
       }
-      
+
       return {
-        lineHeight: scaleFontSize(responsiveLineHeight),
+        fontSize: scaleFontSize(config.fontSize),
+        lineHeight: scaleFontSize(config.lineHeight),
       };
     }
-    
+
+    if (disableScaling) {
+      return {
+        fontSize: toPxString(resolvedSize),
+      };
+    }
+
+    return {
+      fontSize: scaleFontSize(resolvedSize),
+    };
+  }, [resolvedSize, disableScaling, scaleFontSize]);
+
+  const weightStyle = useMemo(() => {
+    if (resolvedWeight === undefined) return {};
+
+    if (typeof resolvedWeight === 'string') {
+      return { fontWeight: WEIGHT_MAP[resolvedWeight as keyof typeof WEIGHT_MAP] ?? 400 };
+    }
+
+    if (typeof resolvedWeight === 'number') {
+      return { fontWeight: resolvedWeight };
+    }
+
     return {};
-  };
+  }, [resolvedWeight]);
+
+  const lineHeightStyle = useMemo(() => {
+    if (resolvedLineHeight === undefined) return {};
+
+    if (disableScaling) {
+      return { lineHeight: toPxString(resolvedLineHeight) };
+    }
+
+    return { lineHeight: scaleFontSize(resolvedLineHeight) };
+  }, [resolvedLineHeight, disableScaling, scaleFontSize]);
 
   // Obtener estilos base de la variante
   // Mapeo de variantes a clases Tailwind (font-size/line-height definidas en theme extend fontSize)
@@ -190,18 +183,12 @@ export const Text = forwardRef<unknown, TextProps>(({
     codeSmall: 'text-code-sm font-mono'
   };
 
-  const baseStyles: React.CSSProperties = {};
-  
-  // Aplicar escalado automático a los estilos base si no está deshabilitado
-  const scaledBaseStyles = baseStyles; // Ahora las escalas vienen de clases, no de estilos inline
-
   const textStyle: React.CSSProperties = {
-    ...scaledBaseStyles,
-    ...getSizeStyle(),
-    ...getWeightStyle(),
-    ...getLineHeightStyle(),
+    ...sizeStyle,
+    ...weightStyle,
+    ...lineHeightStyle,
     color: getTextColor(),
-    textAlign: useResponsiveValue(align),
+    textAlign: resolvedAlign,
     ...(truncate && {
       overflow: 'hidden',
       textOverflow: 'ellipsis',

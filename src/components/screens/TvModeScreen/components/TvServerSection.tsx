@@ -3,12 +3,12 @@ import { useTranslations } from '../../../../hooks/useTranslations';
 import { ServerView } from '../../ServerSelectorScreen/components/ServerView';
 import { StepSection } from './StepSection';
 import type { Group } from '../../ServerSelectorScreen/types';
-import type { ConfigItem } from '../../../../types/config';
+import type { ConfigCategory, ConfigItem } from '../../../../types/config';
 
 interface TvServerSectionProps {
   loading: boolean;
   loadError: string | null;
-  selectedCategory: Record<string, unknown>;
+  selectedCategory: ConfigCategory | null;
   compact: boolean;
   headerSize: 'small' | 'medium' | 'large';
   padding: number;
@@ -18,9 +18,9 @@ interface TvServerSectionProps {
   setQuery: (query: string) => void;
   groupedItems: Group<ConfigItem>[];
   activeConfig: ConfigItem | null;
-  pendingConfigId: string | number | null;
-  toggleGroup: (category: string) => void;
-  isGroupExpanded: (category: string) => boolean;
+  pendingConfigId: number | null;
+  toggleGroup: (groupKey: string) => void;
+  isGroupExpanded: (groupKey: string) => boolean;
   handleConfigSelect: (config: ConfigItem) => void;
 }
 
@@ -80,7 +80,7 @@ export const TvServerSection: React.FC<TvServerSectionProps> = ({
               setQuery={setQuery}
               groupedItems={groupedItems}
               activeConfig={activeConfig}
-              pendingConfigId={typeof pendingConfigId === 'string' ? parseInt(pendingConfigId) : pendingConfigId}
+              pendingConfigId={pendingConfigId}
               toggleGroup={toggleGroup}
               isGroupExpanded={isGroupExpanded}
               handleConfigSelect={handleConfigSelect}

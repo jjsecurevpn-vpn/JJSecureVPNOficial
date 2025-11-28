@@ -3,7 +3,7 @@
  * @description Componente de botón reutilizable con escalado responsivo automático
  */
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { useResponsiveButton, useResponsiveValue } from '../../hooks/useResponsiveScale';
 import { useResponsive, type Breakpoint } from '../../hooks/useResponsive';
 import { colors, shadows, borderRadius } from '../../constants/theme';
@@ -40,7 +40,75 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
   children: React.ReactNode;
 }
 
-export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
+const SIZE_CONFIGS = {
+  small: {
+    padding: '8px 16px',
+    fontSize: 14,
+    minHeight: 32,
+  },
+  medium: {
+    padding: '12px 20px',
+    fontSize: 16,
+    minHeight: 40,
+  },
+  large: {
+    padding: '16px 24px',
+    fontSize: 18,
+    minHeight: 48,
+  },
+} as const;
+
+const toPxString = (value: string | number) => (typeof value === 'number' ? `${value}px` : value);
+
+const getVariantStyles = (variant: ButtonProps['variant']) => {
+  switch (variant) {
+    case 'primary':
+      return {
+        backgroundColor: colors.accent.primary,
+        color: colors.text.primary,
+        border: 'none',
+        hoverColor: colors.accent.strong,
+      };
+    case 'secondary':
+      return {
+        backgroundColor: colors.background.secondary,
+        color: colors.text.primary,
+        border: `1px solid ${colors.border.secondary}`,
+        hoverColor: colors.background.tertiary,
+      };
+    case 'outline':
+      return {
+        backgroundColor: 'transparent',
+        color: colors.text.secondary,
+        border: `1px solid ${colors.border.secondary}`,
+        hoverColor: colors.background.tertiary,
+      };
+    case 'success':
+      return {
+        backgroundColor: colors.status.success,
+        color: colors.text.primary,
+        border: 'none',
+        hoverColor: colors.accent?.strong || colors.status.success,
+      };
+    case 'danger':
+      return {
+        backgroundColor: colors.status.error,
+        color: colors.text.primary,
+        border: 'none',
+        // Usar misma base (sin hex crudo) hasta definir shade en tokens
+        hoverColor: colors.status.error,
+      };
+    default:
+      return {
+        backgroundColor: colors.accent.primary,
+        color: colors.text.primary,
+        border: 'none',
+        hoverColor: colors.accent.strong,
+      };
+  }
+};
+
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ 
   variant = 'primary',
   size = 'medium',
   fullWidth = false,
@@ -61,157 +129,61 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(({
   const { spacing, fontSize: scaleFontSize } = useResponsiveButton();
   useResponsive(); // mantener hook para posibles efectos de layout aunque no se use directamente
   
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'primary':
-        return {
-          backgroundColor: colors.accent.primary,
-          color: colors.text.primary,
-          border: 'none',
-          hoverColor: colors.accent.strong,
-        };
-      case 'secondary':
-        return {
-          backgroundColor: colors.background.secondary,
-          color: colors.text.primary,
-          border: `1px solid ${colors.border.secondary}`,
-          hoverColor: colors.background.tertiary,
-        };
-      case 'outline':
-        return {
-          backgroundColor: 'transparent',
-          color: colors.text.secondary,
-          border: `1px solid ${colors.border.secondary}`,
-          hoverColor: colors.background.tertiary,
-        };
-      case 'success':
-        return {
-          backgroundColor: colors.status.success,
-          color: colors.text.primary,
-          border: 'none',
-          hoverColor: colors.accent?.strong || colors.status.success,
-        };
-      case 'danger':
-        return {
-          backgroundColor: colors.status.error,
-          color: colors.text.primary,
-          border: 'none',
-          // Usar misma base (sin hex crudo) hasta definir shade en tokens
-          hoverColor: colors.status.error,
-        };
-      default:
-        return {
-          backgroundColor: colors.accent.primary,
-          color: colors.text.primary,
-          border: 'none',
-          hoverColor: colors.accent.strong,
-        };
-    }
-  };
+  const responsiveSize = useResponsiveValue(size);
+  const responsivePadding = useResponsiveValue<string | number | undefined>(
+    (padding ?? undefined) as ResponsiveValue<string | number | undefined>,
+  );
+  const responsiveHeight = useResponsiveValue<string | number | undefined>(
+    (height ?? undefined) as ResponsiveValue<string | number | undefined>,
+  );
+  const responsiveFontSize = useResponsiveValue<string | number | undefined>(
+    (fontSize ?? undefined) as ResponsiveValue<string | number | undefined>,
+  );
+  const responsiveBorderRadius = useResponsiveValue<string | number | undefined>(
+    (customBorderRadius ?? undefined) as ResponsiveValue<string | number | undefined>,
+  );
 
-  const getSizeStyles = () => {
-    const responsiveSize = useResponsiveValue(size);
-    
-    const sizeConfigs = {
-      small: {
-        padding: '8px 16px',
-        fontSize: 14,
-        minHeight: 32,
-      },
-      medium: {
-        padding: '12px 20px',
-        fontSize: 16,
-        minHeight: 40,
-      },
-      large: {
-        padding: '16px 24px',
-        fontSize: 18,
-        minHeight: 48,
-      },
-    };
-    
-    const config = sizeConfigs[responsiveSize as keyof typeof sizeConfigs] || sizeConfigs.medium;
-    
+  const sizeStyles = useMemo(() => {
+    const config = SIZE_CONFIGS[responsiveSize as keyof typeof SIZE_CONFIGS] || SIZE_CONFIGS.medium;
+
     if (disableScaling) {
       return {
         padding: config.padding,
-        fontSize: `${config.fontSize}px`,
-        minHeight: `${config.minHeight}px`,
+        fontSize: toPxString(config.fontSize),
+        minHeight: toPxString(config.minHeight),
       };
     }
-    
+
     return {
       padding: spacing(config.padding),
       fontSize: scaleFontSize(config.fontSize),
       minHeight: spacing(config.minHeight),
     };
-  };
+  }, [responsiveSize, disableScaling, spacing, scaleFontSize]);
 
-  const getCustomStyles = () => {
+  const customStyles = useMemo(() => {
     const styles: React.CSSProperties = {};
-    
-    // Padding personalizado
-    if (padding !== undefined) {
-      const responsivePadding = useResponsiveValue(padding);
-      if (responsivePadding !== undefined) {
-        if (disableScaling) {
-          styles.padding = typeof responsivePadding === 'number' 
-            ? `${responsivePadding}px` 
-            : responsivePadding;
-        } else {
-          styles.padding = spacing(responsivePadding);
-        }
-      }
-    }
-    
-    // Height personalizado
-    if (height !== undefined) {
-      const responsiveHeight = useResponsiveValue(height);
-      if (responsiveHeight !== undefined) {
-        if (disableScaling) {
-          styles.height = typeof responsiveHeight === 'number' 
-            ? `${responsiveHeight}px` 
-            : responsiveHeight;
-        } else {
-          styles.height = spacing(responsiveHeight);
-        }
-      }
-    }
-    
-    // Font size personalizado
-    if (fontSize !== undefined) {
-      const responsiveFontSize = useResponsiveValue(fontSize);
-      if (responsiveFontSize !== undefined) {
-        if (disableScaling) {
-          styles.fontSize = typeof responsiveFontSize === 'number' 
-            ? `${responsiveFontSize}px` 
-            : responsiveFontSize;
-        } else {
-          styles.fontSize = scaleFontSize(responsiveFontSize);
-        }
-      }
-    }
-    
-    // Border radius personalizado
-    if (customBorderRadius !== undefined) {
-      const responsiveBorderRadius = useResponsiveValue(customBorderRadius);
-      if (responsiveBorderRadius !== undefined) {
-        if (disableScaling) {
-          styles.borderRadius = typeof responsiveBorderRadius === 'number' 
-            ? `${responsiveBorderRadius}px` 
-            : responsiveBorderRadius;
-        } else {
-          styles.borderRadius = spacing(responsiveBorderRadius);
-        }
-      }
-    }
-    
-    return styles;
-  };
 
-  const variantStyles = getVariantStyles();
-  const sizeStyles = getSizeStyles();
-  const customStyles = getCustomStyles();
+    if (responsivePadding !== undefined) {
+      styles.padding = disableScaling ? toPxString(responsivePadding) : spacing(responsivePadding);
+    }
+
+    if (responsiveHeight !== undefined) {
+      styles.height = disableScaling ? toPxString(responsiveHeight) : spacing(responsiveHeight);
+    }
+
+    if (responsiveFontSize !== undefined) {
+      styles.fontSize = disableScaling ? toPxString(responsiveFontSize) : scaleFontSize(responsiveFontSize);
+    }
+
+    if (responsiveBorderRadius !== undefined) {
+      styles.borderRadius = disableScaling ? toPxString(responsiveBorderRadius) : spacing(responsiveBorderRadius);
+    }
+
+    return styles;
+  }, [responsivePadding, responsiveHeight, responsiveFontSize, responsiveBorderRadius, disableScaling, spacing, scaleFontSize]);
+
+  const variantStyles = useMemo(() => getVariantStyles(variant), [variant]);
 
   const buttonStyle: React.CSSProperties = {
     ...sizeStyles,

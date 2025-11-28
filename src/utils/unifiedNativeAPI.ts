@@ -235,7 +235,8 @@ export const authAPI = {
 
   /**
    * Determina qué campos de autenticación deben mostrarse para el servidor activo.
-   * Oculta credenciales solo para servidores específicos como "SOLO EMERGENCIAS" o "GRATUITO".
+   * Oculta credenciales solo para servidores específicos como "SOLO EMERGENCIAS".
+   * EXCEPCIÓN: Si el item/config tiene "Hysteria" en nombre o descripción, SÍ muestra credenciales.
    */
   shouldShowInput(type: "username" | "password" | "uuid"): boolean {
     try {
@@ -246,11 +247,33 @@ export const authAPI = {
       const serverName = config.name?.toLowerCase() ?? '';
       const serverDescription = config.description?.toLowerCase() ?? '';
 
+      // Detectar si es un servidor Hysteria UDP (por nombre, descripción o modo)
+      const isHysteriaServer = 
+        serverName.includes('hysteria') || 
+        serverDescription.includes('hysteria') ||
+        mode.includes('hysteria');
+
+      // Si es Hysteria, SIEMPRE mostrar credenciales (usuario/password)
+      if (isHysteriaServer) {
+        console.log('🔍 [shouldShowInput] Hysteria detectado - mostrando credenciales', {
+          type,
+          serverName: config.name,
+          mode
+        });
+        // Hysteria no usa UUID, solo user/pass
+        if (type === "uuid") {
+          return false;
+        }
+        return true;
+      }
+
       // Servidores específicos que NO requieren credenciales
+      // IMPORTANTE: Esta verificación se hace DESPUÉS de Hysteria, así que
+      // "Hysteria Gratuito" SÍ mostrará credenciales (Hysteria tiene prioridad)
       const noCredentialsKeywords = [
         'solo emergencias',
-        'gratuito',
         'emergency only',
+        'gratuito',
         'free'
       ];
 
@@ -263,6 +286,7 @@ export const authAPI = {
         type,
         serverName: config.name,
         isNoCredentialsServer,
+        isHysteriaServer,
         mode
       });
 

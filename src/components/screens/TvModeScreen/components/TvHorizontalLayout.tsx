@@ -3,29 +3,46 @@ import { TvServerSection } from './TvServerSection';
 import { TvCredentialsSection } from './TvCredentialsSection';
 import { TvConnectionSection } from './TvConnectionSection';
 import type { Group } from '../../ServerSelectorScreen/types';
-import type { ConfigItem } from '../../../../types/config';
+import type { ConfigCategory, ConfigItem } from '../../../../types/config';
+import type { UnifiedVpnState } from '../../../../hooks/useUnifiedVpn';
+import type { VpnState } from '../../../../types/vpn';
+
+interface ResponsiveLayoutConfig {
+  columns: string;
+  rightColumns: string;
+  direction: 'vertical' | 'horizontal';
+  spacing: number;
+  padding: number;
+  headerSize: 'small' | 'medium' | 'large';
+  buttonSize: 'small' | 'medium' | 'large';
+  fontSize: 'small' | 'base' | 'large';
+  stacked: boolean;
+  compact: boolean;
+  serverWidth: string;
+  legacy: boolean;
+}
 
 interface TvHorizontalLayoutProps {
   spacePx: (value: number) => number;
-  responsiveLayout: Record<string, unknown>;
+  responsiveLayout: ResponsiveLayoutConfig;
   highlightStep1: boolean;
   highlightStep2: boolean;
   loading: boolean;
   loadError: string | null;
-  selectedCategory: Record<string, unknown>;
+  selectedCategory: ConfigCategory | null;
   contentJustifyClass: string;
   query: string;
   setQuery: (query: string) => void;
   groupedItems: Group<ConfigItem>[];
   ssActiveConfig: ConfigItem | null;
-  pendingConfigId: string | number | null;
-  toggleGroup: (category: string) => void;
-  isGroupExpanded: (category: string) => boolean;
+  pendingConfigId: number | null;
+  toggleGroup: (groupKey: string) => void;
+  isGroupExpanded: (groupKey: string) => boolean;
   handleConfigSelect: (config: ConfigItem) => void;
   activeConfig: ConfigItem | null;
   formError: string | null;
-  vpn: Record<string, unknown>;
-  handleConnection: () => Record<string, unknown>;
+  vpn: UnifiedVpnState;
+  handleConnection: () => Promise<void | VpnState | null> | void;
   showServerDescription: boolean;
 }
 

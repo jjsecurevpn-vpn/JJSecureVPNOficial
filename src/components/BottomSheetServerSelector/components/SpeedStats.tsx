@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Download, Upload } from 'lucide-react';
 import type { NetSpeedsResult } from "../../../hooks/useNetSpeeds";
 
@@ -6,7 +7,11 @@ interface SpeedStatsProps {
   isConnected: boolean;
 }
 
-export function SpeedStats({
+/**
+ * SpeedStats - Componente memoizado para mostrar estadísticas de velocidad
+ * Solo se re-renderiza cuando cambian los valores de velocidad o el estado de conexión
+ */
+function SpeedStatsComponent({
   netSpeeds,
   isConnected,
 }: SpeedStatsProps) {
@@ -37,3 +42,14 @@ export function SpeedStats({
     </div>
   );
 }
+
+// Función de comparación personalizada para evitar re-renders innecesarios
+function arePropsEqual(prevProps: SpeedStatsProps, nextProps: SpeedStatsProps): boolean {
+  return (
+    prevProps.isConnected === nextProps.isConnected &&
+    prevProps.netSpeeds.formatted.download === nextProps.netSpeeds.formatted.download &&
+    prevProps.netSpeeds.formatted.upload === nextProps.netSpeeds.formatted.upload
+  );
+}
+
+export const SpeedStats = memo(SpeedStatsComponent, arePropsEqual);

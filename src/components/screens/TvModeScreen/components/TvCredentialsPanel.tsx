@@ -11,33 +11,71 @@ export const TvCredentialsPanel: React.FC<{ compact?: boolean }> = ({ compact })
 
   const activeConfig = useMemo(() => nativeAPI.config.getActive(), []);
   const mode = activeConfig?.mode?.toLowerCase() || '';
+  const serverName = activeConfig?.name?.toLowerCase() || '';
+  const serverDescription = activeConfig?.description?.toLowerCase() || '';
   const isHysteria = mode.includes('hysteria');
   const isV2Ray = mode.startsWith('v2ray');
   const showUUIDInput = isV2Ray && !activeConfig?.auth?.v2ray_uuid;
+  
+  // Detectar si es "Hysteria Gratuito" específicamente
+  const isHysteriaGratuito = isHysteria && (
+    serverName.includes('gratuito') || 
+    serverName.includes('free') ||
+    serverDescription.includes('gratuito') ||
+    serverDescription.includes('free')
+  );
+  
+  // Placeholders especiales para Hysteria Gratuito
+  const usernamePlaceholder = isHysteriaGratuito 
+    ? 'Usuario: secure' 
+    : (t.credentialsPanel?.usernamePlaceholder || 'Usuario');
+  const passwordPlaceholder = isHysteriaGratuito 
+    ? 'Clave: secure' 
+    : (t.credentialsPanel?.passwordPlaceholder || 'Contraseña');
 
   useEffect(() => {
     const u = nativeAPI.auth.getUsername() || '';
     const p = nativeAPI.auth.getPassword() || '';
     const uuid = nativeAPI.auth.getUUID() || '';
-    if (isHysteria) {
-      const source = u.includes(':') ? u : p;
+    
+    // Si es Hysteria Gratuito, pre-llenar con "secure"
+    if (isHysteriaGratuito) {
+      setFields(f => ({ ...f, username: 'secure', password: 'secure', uuid }));
+      // También guardar en nativeAPI para que esté listo
+      nativeAPI.auth.setUsername('secure:secure');
+      nativeAPI.auth.setPassword('secure:secure');
+    } else if (isHysteria) {
+      // Hysteria normal: limpiar si tenía "secure" del servidor anterior
+      const cleanU = u === 'secure:secure' ? '' : u;
+      const cleanP = p === 'secure:secure' ? '' : p;
+      const source = cleanU.includes(':') ? cleanU : cleanP;
       if (source.includes(':')) {
         const [hu, hp] = source.split(':', 2);
-        setFields(f => ({ ...f, hysteriaUser: hu || '', hysteriaPass: hp || '' }));
+        setFields(f => ({ ...f, username: hu || '', password: hp || '', uuid }));
       } else {
-        setFields(f => ({ ...f, hysteriaUser: u, hysteriaPass: p }));
+        setFields(f => ({ ...f, username: cleanU, password: cleanP, uuid }));
       }
     } else {
-      setFields(f => ({ ...f, username: u, password: p }));
+      // Otros servidores: limpiar si tenía "secure" del servidor anterior
+      const cleanU = (u === 'secure:secure' || u === 'secure') ? '' : u;
+      const cleanP = (p === 'secure:secure' || p === 'secure') ? '' : p;
+      setFields(f => ({ ...f, username: cleanU, password: cleanP, uuid }));
+      // Limpiar también en nativeAPI si tenía secure
+      if (u === 'secure:secure' || u === 'secure') {
+        nativeAPI.auth.setUsername('');
+      }
+      if (p === 'secure:secure' || p === 'secure') {
+        nativeAPI.auth.setPassword('');
+      }
     }
-    setFields(f => ({ ...f, uuid }));
-  }, [isHysteria]);
+  }, [isHysteria, isHysteriaGratuito]);
 
   const persist = useCallback((draft: Partial<typeof fields>) => {
     setFields(f => {
       const next = { ...f, ...draft };
       if (isHysteria) {
-        const combined = `${next.hysteriaUser.trim()}:${next.hysteriaPass.trim()}`;
+        // Hysteria: combinar user:pass usando los inputs normales
+        const combined = `${next.username.trim()}:${next.password.trim()}`;
         if (combined !== ':') {
           nativeAPI.auth.setUsername(combined);
           nativeAPI.auth.setPassword(combined);
@@ -76,49 +114,25 @@ export const TvCredentialsPanel: React.FC<{ compact?: boolean }> = ({ compact })
 
   return (
     <div className={sizeConfig.spacing}>
-      {isHysteria ? (
-        <>
-          <InputField
-            placeholder={t.credentialsPanel?.usernamePlaceholder || 'Usuario'}
-            value={fields.hysteriaUser}
-            onChange={(v) => persist({ hysteriaUser: v })}
-            sizeConfig={sizeConfig}
-            compact={compact}
-          />
-          <InputField
-            placeholder={t.credentialsPanel?.passwordPlaceholder || 'Contraseña'}
-            type="password"
-            value={fields.hysteriaPass}
-            onChange={(v) => persist({ hysteriaPass: v })}
-            showToggle
-            shown={visibility.password}
-            onToggle={() => setVisibility(v => ({ ...v, password: !v.password }))}
-            sizeConfig={sizeConfig}
-            compact={compact}
-          />
-        </>
-      ) : (
-        <>
-          <InputField
-            placeholder={t.credentialsPanel?.usernamePlaceholder || 'Usuario'}
-            value={fields.username}
-            onChange={(v) => persist({ username: v })}
-            sizeConfig={sizeConfig}
-            compact={compact}
-          />
-          <InputField
-            placeholder={t.credentialsPanel?.passwordPlaceholder || 'Contraseña'}
-            type="password"
-            value={fields.password}
-            onChange={(v) => persist({ password: v })}
-            showToggle
-            shown={visibility.password}
-            onToggle={() => setVisibility(v => ({ ...v, password: !v.password }))}
-            sizeConfig={sizeConfig}
-            compact={compact}
-          />
-        </>
-      )}
+      {/* Siempre mostramos inputs normales (username/password) */}
+      <InputField
+        placeholder={usernamePlaceholder}
+        value={fields.username}
+        onChange={(v) => persist({ username: v })}
+        sizeConfig={sizeConfig}
+        compact={compact}
+      />
+      <InputField
+        placeholder={passwordPlaceholder}
+        type="password"
+        value={fields.password}
+        onChange={(v) => persist({ password: v })}
+        showToggle
+        shown={visibility.password}
+        onToggle={() => setVisibility(v => ({ ...v, password: !v.password }))}
+        sizeConfig={sizeConfig}
+        compact={compact}
+      />
       {showUUIDInput && (
         <InputField
           placeholder={t.credentialsPanel?.uuidPlaceholder || 'UUID'}

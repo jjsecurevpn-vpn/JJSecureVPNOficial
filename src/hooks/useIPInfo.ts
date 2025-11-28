@@ -97,42 +97,63 @@ function computeDisplayIP(vpnState: VpnState | undefined, localIP: string, vpnIP
 
 // Hook principal -----------------------------------------------------------
 export function useIPInfo(vpnState?: VpnState): UseIPInfoResult {
-  const [localIP, setLocalIP] = useState<string>("127.0.0.1");
-  const [vpnIP, setVpnIP] = useState<string | null>(null);
-  const [ipLabel, setIpLabel] = useState<string>("IP Local");
-  const [displayIP, setDisplayIP] = useState<string>("Detectando...");
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [lastUpdated, setLastUpdated] = useState<number>(0);
+  const [state, setState] = useState({
+    localIP: "127.0.0.1",
+    vpnIP: null as string | null,
+    ipLabel: "IP Local",
+    displayIP: "Detectando...",
+    isLoading: true,
+    lastUpdated: 0,
+  });
   const lastUpdatedRef = useRef(0);
   const sourcesRef = useRef<{ local: string; vpn: string | null }>({ local: "DtGetLocalIP", vpn: null });
   const intervalRef = useRef<number | null>(null);
   const unmountedRef = useRef(false);
+  const vpnStateRef = useRef(vpnState);
+  
+  // Mantener referencia actualizada del estado VPN
+  vpnStateRef.current = vpnState;
 
   const update = useCallback(() => {
     if (unmountedRef.current) return;
-    // Evitar actualizaciones redundantes dentro del mismo tick rápido (<150ms)
+    // Evitar actualizaciones redundantes dentro del mismo tick rápido (<200ms)
     const now = Date.now();
-    if (lastUpdatedRef.current && (now - lastUpdatedRef.current) < 150) {
+    if (lastUpdatedRef.current && (now - lastUpdatedRef.current) < 200) {
       return; // throttle para prevenir loops accidentales
     }
     try {
-      if (lastUpdatedRef.current === 0) setIsLoading(true);
       const lIP = safeGetLocalIP();
       const { ip: tunnel, source } = resolveVpnIP();
-      // Solo setState si cambió algo relevante para reducir renders
-      setLocalIP(prev => (prev !== lIP ? lIP : prev));
-      setVpnIP(prev => (prev !== tunnel ? tunnel : prev));
       sourcesRef.current = { local: "DtGetLocalIP", vpn: source };
-      const newLabel = computeLabel(vpnState, tunnel);
-      setIpLabel(prev => (prev !== newLabel ? newLabel : prev));
-      const newDisplay = computeDisplayIP(vpnState, lIP, tunnel);
-      setDisplayIP(prev => (prev !== newDisplay ? newDisplay : prev));
+      const currentVpnState = vpnStateRef.current;
+      const newLabel = computeLabel(currentVpnState, tunnel);
+      const newDisplay = computeDisplayIP(currentVpnState, lIP, tunnel);
+      
+      // Actualización consolidada - solo un setState
+      setState(prev => {
+        // Verificar si hay cambios reales
+        if (
+          prev.localIP === lIP &&
+          prev.vpnIP === tunnel &&
+          prev.ipLabel === newLabel &&
+          prev.displayIP === newDisplay
+        ) {
+          return prev; // Sin cambios, evitar re-render
+        }
+        return {
+          localIP: lIP,
+          vpnIP: tunnel,
+          ipLabel: newLabel,
+          displayIP: newDisplay,
+          isLoading: false,
+          lastUpdated: now,
+        };
+      });
       lastUpdatedRef.current = now;
-      setLastUpdated(now);
-    } finally {
-      if (lastUpdatedRef.current !== 0) setIsLoading(false);
+    } catch {
+      // Error silencioso
     }
-  }, [vpnState]);
+  }, []);
 
   const refresh = useCallback(() => {
     update();
@@ -161,12 +182,12 @@ export function useIPInfo(vpnState?: VpnState): UseIPInfoResult {
   useEffect(() => () => { unmountedRef.current = true; if (intervalRef.current) window.clearInterval(intervalRef.current); }, []);
 
   return {
-    localIP,
-    vpnIP,
-    displayIP,
-    ipLabel,
-    isLoading,
-    lastUpdated,
+    localIP: state.localIP,
+    vpnIP: state.vpnIP,
+    displayIP: state.displayIP,
+    ipLabel: state.ipLabel,
+    isLoading: state.isLoading,
+    lastUpdated: state.lastUpdated,
     refresh,
     sources: sourcesRef.current,
   };

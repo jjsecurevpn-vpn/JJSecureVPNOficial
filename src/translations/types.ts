@@ -196,6 +196,16 @@ export interface Translations {
     notSharing: string;
     sharingDescription: string;
     notSharingDescription: string;
+    // Nuevos estados de transición
+    starting: string;
+    stopping: string;
+    startingDescription: string;
+    stoppingDescription: string;
+    checkingStatus: string;
+    unknownDescription: string;
+    lastUpdate: string;
+    refreshStatus: string;
+    // Botones y acciones
     start: string;
     stop: string;
     processing: string;

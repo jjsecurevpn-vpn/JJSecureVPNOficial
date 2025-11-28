@@ -209,6 +209,16 @@ export const es: Translations = {
     sharingDescription: "Otros dispositivos pueden conectarse y usar tu VPN",
     notSharingDescription:
       "Activa el hotspot para compartir tu conexión VPN segura",
+    // Nuevos estados
+    starting: "Iniciando Hotspot...",
+    stopping: "Deteniendo Hotspot...",
+    startingDescription: "Preparando el hotspot, espera un momento...",
+    stoppingDescription: "Finalizando conexiones activas...",
+    checkingStatus: "Verificando estado...",
+    unknownDescription: "Verificando el estado del servicio de hotspot...",
+    lastUpdate: "Última actualización",
+    refreshStatus: "Actualizar estado",
+    // Botones y acciones
     start: "Iniciar Hotspot",
     stop: "Detener Hotspot",
     processing: "Procesando...",

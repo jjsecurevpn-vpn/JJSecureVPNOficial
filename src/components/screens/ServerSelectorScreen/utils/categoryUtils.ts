@@ -4,6 +4,7 @@
  */
 
 import { ConfigCategory } from "../../../../types/config";
+import { Translations } from "../../../../translations/types";
 
 export type CategoryType = 'premium' | 'gratuito' | 'emergencias' | 'other';
 
@@ -58,20 +59,13 @@ export const getCleanCategoryName = (categoryName: string): string => {
 /**
  * Obtiene los estilos visuales para un tipo de categoría
  */
-export const getCategoryTypeStyles = (type: CategoryType, translations?: Record<string, unknown>) => {
-  let categoryTypes: Record<string, unknown> | undefined;
-  
-  if (translations && typeof translations === 'object' && 'serverSelectorScreen' in translations) {
-    const serverScreen = translations['serverSelectorScreen'] as unknown;
-    if (serverScreen && typeof serverScreen === 'object' && 'categoryTypes' in (serverScreen as Record<string, unknown>)) {
-      categoryTypes = ((serverScreen as Record<string, unknown>)['categoryTypes'] as unknown) as Record<string, unknown>;
-    }
-  }
+export const getCategoryTypeStyles = (type: CategoryType, translations?: Translations) => {
+  const categoryTypes = translations?.serverSelectorScreen?.categoryTypes;
   
   const texts = {
-    premium: (categoryTypes?.['premium'] as string | undefined) || 'PREMIUM',
-    free: (categoryTypes?.['free'] as string | undefined) || 'GRATUITO',
-    emergency: (categoryTypes?.['emergency'] as string | undefined) || 'EMERGENCIAS'
+    premium: categoryTypes?.premium || 'PREMIUM',
+    free: categoryTypes?.free || 'GRATUITO',
+    emergency: categoryTypes?.emergency || 'EMERGENCIAS'
   };
 
   // Estilos minimalistas (sin gradientes) manteniendo buen contraste

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { BottomSheetServerSelector } from "./components/BottomSheetServerSelector/index";
@@ -67,8 +67,8 @@ function App() {
 
   const { containerStyle } = useAppLayout();
 
-  // Función para manejar la navegación del footer
-  const handleFooterNavigation = (tab: string) => {
+  // Función memoizada para manejar la navegación del footer
+  const handleFooterNavigation = useCallback((tab: string) => {
     setActiveTab(tab);
     setCurrentModal(null);
 
@@ -77,21 +77,24 @@ function App() {
       // Limpia posibles mensajes de error tras cerrar overlays
       setTimeout(() => setConnectionError(null), 50);
     }
-  };
+  }, []);
+
+  // Estado de navegación memoizado para evitar recreaciones en useAppNavigation
+  const navigationState = useMemo(() => ({
+    currentModal,
+    showWelcomeScreen,
+    activeTab,
+  }), [currentModal, showWelcomeScreen, activeTab]);
+
+  // Acciones de navegación memoizadas
+  const navigationActions = useMemo(() => ({
+    setCurrentModal,
+    setShowWelcomeScreen,
+    handleFooterNavigation,
+  }), [handleFooterNavigation]);
 
   // Hook mejorado para navegación con botón back de Android
-  useAppNavigation(
-    {
-      currentModal,
-      showWelcomeScreen,
-      activeTab,
-    },
-    {
-      setCurrentModal,
-      setShowWelcomeScreen,
-      handleFooterNavigation,
-    }
-  );
+  useAppNavigation(navigationState, navigationActions);
 
   // Función global para development/testing (disponible en console del navegador)
   useEffect(() => {
@@ -254,15 +257,15 @@ function App() {
   // Efecto simplificado - ya no hay sincronización de activeTab con modales
   // porque todas las pantallas son tabs independientes
 
-  // Funciones para manejar las acciones de la pantalla de bienvenida
-  const handleWelcomeContinueToApp = () => {
+  // Funciones memoizadas para manejar las acciones de la pantalla de bienvenida
+  const handleWelcomeContinueToApp = useCallback(() => {
     // Solo esta función cierra el WelcomeScreen
     setStorageItem("app-welcome-completed", true);
     setStorageItem("user-guest-mode", true);
     setShowWelcomeScreen(false);
-  };
+  }, []);
 
-  const handleWelcomeBuyPremium = () => {
+  const handleWelcomeBuyPremium = useCallback(() => {
     // Abre el enlace externo en webview
     if (window.DtOpenWebview) {
       window.DtOpenWebview.execute("https://shop.jhservices.com.ar/planes");
@@ -270,9 +273,9 @@ function App() {
       // Fallback para desarrollo
       window.open("https://shop.jhservices.com.ar/planes", "_blank");
     }
-  };
+  }, []);
 
-  const handleWelcomeResellerPlans = () => {
+  const handleWelcomeResellerPlans = useCallback(() => {
     // Abre el enlace externo en webview
     if (window.DtOpenWebview) {
       window.DtOpenWebview.execute(
@@ -286,7 +289,7 @@ function App() {
       // Fallback para desarrollo
       window.open("https://shop.jhservices.com.ar/revendedores", "_blank");
     }
-  };
+  }, []);
 
   const handleModalNavigate = useCallback(
     (modal: ModalType | null) => {

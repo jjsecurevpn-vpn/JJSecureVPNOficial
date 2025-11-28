@@ -76,10 +76,10 @@ export function Header({
   };
 
   // Gradiente del header según estado (rojo mock vs verde conectado)
-  // Gradiente suave y único sin cortes abruptos
+  // Gradiente suave, simétrico y balanceado
   const gradientBackground = isConnected
-    ? "linear-gradient(180deg, rgba(76,217,159,0.55) 0%, rgba(46,173,120,0.35) 40%, rgba(15,94,72,0.1) 80%, transparent 100%)"
-    : "linear-gradient(180deg, rgba(255,104,104,0.55) 0%, rgba(220,80,100,0.35) 40%, rgba(100,50,70,0.1) 80%, transparent 100%)";
+    ? "linear-gradient(180deg, rgba(76,217,159,0.5) 0%, rgba(56,190,135,0.3) 35%, rgba(36,140,100,0.12) 70%, transparent 100%)"
+    : "linear-gradient(180deg, rgba(255,104,104,0.5) 0%, rgba(235,90,100,0.3) 35%, rgba(180,70,85,0.12) 70%, transparent 100%)";
 
   return (
     <>

@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import { readdirSync, readFileSync, writeFileSync, existsSync, rmSync, statSync } from "fs";
 import { join } from "path";
+import { PurgeCSS } from "purgecss";
 
 /*
   build-inline.ts (refactor optimizado)
@@ -9,7 +10,7 @@ import { join } from "path";
   2. Permitir excluir chunks no esenciales (--exclude="maps-vendor,report" etc.).
   3. Concatenar sólo CSS vinculado al entry (manifest.css + imported css).
   4. Ofuscar crédito y limpiar comentarios largos innecesarios.
-  5. Opcional: purgado heurístico rápido de CSS (--purge-css) eliminando selectores no presentes en HTML base inicial (limitado).
+  5. Integración opcional de PurgeCSS real (--purge-css) para eliminar selectores no usados con base en el contenido TSX.
   6. Flag --inline-only-js para forzar inlining aunque haya css separado.
   7. Log compacto con tamaños.
 
@@ -39,10 +40,13 @@ const excludeList = (getFlagValue('--exclude') || '')
   .filter(Boolean);
 const inlineOnlyJs = hasFlag('--inline-only-js');
 const purgeCss = hasFlag('--purge-css');
+const legacyPurge = hasFlag('--legacy-purge');
 const silent = hasFlag('--silent');
 const hardExclude = hasFlag('--hard-exclude'); // Elimina físicamente archivos coincidentes con --exclude
 
 const log = (...args: any[]) => { if (!silent) console.log(...args); };
+const ROOT = process.cwd();
+const fileSize = (p: string) => { try { return statSync(p).size; } catch { return 0; } };
 
 // ---------------------- Helpers ----------------------
 const runBuild = () => {
@@ -132,9 +136,9 @@ const obfuscateCredit = (jsCode: string): string => {
 // Eliminación heurística de comentarios largos y licencias redundantes
 const stripLargeComments = (code: string) => code.replace(/\/\*!?[^]*?\*\//g, (m) => m.length > 160 ? '' : m);
 
-// Purga CSS muy superficial: elimina selectores que no aparecen en el HTML base (solo #root por ahora) excepto los que contengan animation/keyframes/@media
+// Purga CSS muy superficial (activar con --legacy-purge) para entornos donde no se pueda usar PurgeCSS real.
 const heuristicCssPurge = (css: string): string => {
-  if (!purgeCss) return css;
+  if (!legacyPurge) return css;
   // Mantener siempre reglas @ y variables
   const lines = css.split(/}\n?/).map(l => l.trim()).filter(Boolean);
   const keep: string[] = [];
@@ -150,6 +154,54 @@ const heuristicCssPurge = (css: string): string => {
   const ratio = ((result.length / css.length) * 100).toFixed(1);
   log(`🧹 Purge CSS heurístico: ${ratio}% restante.`);
   return result;
+};
+
+const runAdvancedPurge = async (cssFiles: string[], assetsDir: string) => {
+  if (!purgeCss || !cssFiles.length) return;
+  const cssPaths = cssFiles.map(f => join(assetsDir, f));
+  const beforeSizes = cssPaths.map(fileSize);
+  log('🧼 Ejecutando PurgeCSS sobre archivos enlazados...');
+  try {
+    const purgeResults = await new PurgeCSS().purge({
+      css: cssPaths,
+      content: [
+        join(ROOT, 'index.html'),
+        join(ROOT, 'src/**/*.{ts,tsx,js,jsx,html}')
+      ],
+      safelist: [
+        /^btn-/,
+        /^badge-/,
+        /^footer-/,
+        /^surface/,
+        /^input-/,
+        /^focus-/,
+        /^spinner-/,
+        /^card-/,
+        /^chip-/,
+        /^alert-/,
+        /^bg-/,
+        /^text-/,
+        'active'
+      ],
+    });
+    purgeResults.forEach(result => {
+      if (result.file) {
+        writeFileSync(result.file, result.css, 'utf8');
+      } else {
+        cssPaths.forEach((filePath, idx) => {
+          if (idx === 0) writeFileSync(filePath, result.css, 'utf8');
+        });
+      }
+    });
+    const afterSizes = cssPaths.map(fileSize);
+    const totalBefore = beforeSizes.reduce((acc, curr) => acc + curr, 0);
+    const totalAfter = afterSizes.reduce((acc, curr) => acc + curr, 0);
+    const savedKB = ((totalBefore - totalAfter) / 1024).toFixed(2);
+    log(`✅ PurgeCSS completado. Ahorro estimado: ${savedKB}KB`);
+  } catch (error) {
+    console.error('❌ PurgeCSS falló:', error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
 };
 
 // Excluir chunks mencionados (modo soft: solo log) si no hay hard-exclude
@@ -208,56 +260,63 @@ const buildInlineHtml = (css: string, js: string) => `<!DOCTYPE html>
 </html>`;
 
 // ---------------------- Flujo principal ----------------------
-runBuild();
-const distPath = join(process.cwd(), 'dist');
-const { jsFile, cssFiles, assetsDir, allFiles, manifest } = getAssets(distPath);
+const main = async () => {
+  runBuild();
+  const distPath = join(ROOT, 'dist');
+  const { jsFile, cssFiles, assetsDir, allFiles, manifest } = getAssets(distPath);
 
-// Eliminación física de recursos excluidos (antes de leer contenidos)
-const removedFiles = physicallyRemoveExcluded(assetsDir, allFiles);
+  // Eliminación física de recursos excluidos (antes de leer contenidos)
+  const removedFiles = physicallyRemoveExcluded(assetsDir, allFiles);
+  await runAdvancedPurge(cssFiles, assetsDir);
 
-// Leer JS principal
-let jsContent = readAsset(assetsDir, jsFile);
-jsContent = stripLargeComments(jsContent);
-jsContent = obfuscateCredit(jsContent);
-jsContent = applyJsExcludes(jsContent);
+  // Leer JS principal
+  let jsContent = readAsset(assetsDir, jsFile);
+  jsContent = stripLargeComments(jsContent);
+  jsContent = obfuscateCredit(jsContent);
+  jsContent = applyJsExcludes(jsContent);
 
-// Combinar CSS asociado (orden estable)
-let cssContent = cssFiles.map(f => readAsset(assetsDir, f)).join('\n');
-if (inlineOnlyJs) {
-  log('⚠️ Flag --inline-only-js activo: CSS descartado para forzar inline mínimo.');
-  cssContent = '';
-}
-cssContent = heuristicCssPurge(cssContent);
-
-// Métricas simples
-const sizeKB = (n: number) => (n / 1024).toFixed(2) + 'KB';
-log(`📏 Tamaño JS: ${sizeKB(jsContent.length)} | CSS: ${sizeKB(cssContent.length)}`);
-
-const finalHtml = buildInlineHtml(cssContent, jsContent);
-writeFileSync(join(distPath, 'index.html'), finalHtml);
-
-// Reporte JSON con métricas
-const fileSize = (p: string) => { try { return statSync(p).size; } catch { return 0; } };
-const report = {
-  timestamp: new Date().toISOString(),
-  entryJs: jsFile,
-  cssFiles,
-  removedFiles,
-  excludeList,
-  hardExclude,
-  inlineOnlyJs,
-  purgeCss,
-  manifestUsed: !!manifest,
-  sizes: {
-    jsInlineBytes: jsContent.length,
-    cssInlineBytes: cssContent.length,
-    htmlBytes: finalHtml.length
+  // Combinar CSS asociado (orden estable)
+  let cssContent = cssFiles.map(f => readAsset(assetsDir, f)).join('\n');
+  if (inlineOnlyJs) {
+    log('⚠️ Flag --inline-only-js activo: CSS descartado para forzar inline mínimo.');
+    cssContent = '';
   }
+  cssContent = heuristicCssPurge(cssContent);
+
+  // Métricas simples
+  const sizeKB = (n: number) => (n / 1024).toFixed(2) + 'KB';
+  log(`📏 Tamaño JS: ${sizeKB(jsContent.length)} | CSS: ${sizeKB(cssContent.length)}`);
+
+  const finalHtml = buildInlineHtml(cssContent, jsContent);
+  writeFileSync(join(distPath, 'index.html'), finalHtml);
+
+  // Reporte JSON con métricas
+  const report = {
+    timestamp: new Date().toISOString(),
+    entryJs: jsFile,
+    cssFiles,
+    removedFiles,
+    excludeList,
+    hardExclude,
+    inlineOnlyJs,
+    purgeCss,
+    manifestUsed: !!manifest,
+    sizes: {
+      jsInlineBytes: jsContent.length,
+      cssInlineBytes: cssContent.length,
+      htmlBytes: finalHtml.length
+    }
+  };
+  writeFileSync(join(distPath, 'inline-report.json'), JSON.stringify(report, null, 2));
+  log('✅ index.html (inline) generado.');
+  log('📝 Reporte generado: inline-report.json');
+  log('ℹ️ Flags usados:', { excludeList, inlineOnlyJs, purgeCss, hardExclude, legacyPurge });
 };
-writeFileSync(join(distPath, 'inline-report.json'), JSON.stringify(report, null, 2));
-log('✅ index.html (inline) generado.');
-log('📝 Reporte generado: inline-report.json');
-log('ℹ️ Flags usados:', { excludeList, inlineOnlyJs, purgeCss, hardExclude });
+
+main().catch((error) => {
+  console.error('❌ build-inline falló:', error instanceof Error ? error.message : error);
+  process.exit(1);
+});
 
 // Ejecutar ejemplo:
 // npx tsx build-inline.ts --exclude=maps-vendor --purge-css
